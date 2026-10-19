@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: docs
-  started_at: '2026-10-19T13:47:01.095247Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -121,6 +117,12 @@ journal:
   kind: started
   at: '2026-10-19T13:47:01.095247Z'
   stage: docs
+- number: 21
+  speaker: documenter
+  kind: result
+  at: '2026-10-19T13:47:31.405540Z'
+  stage: docs
+  run: a7a4ec783ce34216b5e625b0fb7fe660
 ---
 
 # Version command
@@ -313,3 +315,21 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
     - `tests/domain/test_imports.py`: changed under the standing leave to move a shared test helper. `_is_forbidden` now calls `belongs_to`; `test_domain_imports_no_framework_and_no_outer_layer` keeps its name and checks the same thing.
     - `tests/imports.py`: no leave needed. The change only adds `belongs_to` and leaves the existing helpers as they were.
 20. factory: started docs as opencode-demo.
+21. documenter: Files changed:
+    - `README.md`: *Getting started* now shows `uv run python -m app --version` with its output, `app 0.1.0`. It also says that any other argument, or none, prints the usage line to stderr and exits 2. This is the docs criterion. I ran both commands: `--version` printed `app 0.1.0` and exited 0, and with no argument the usage line appeared and the exit code was 2.
+    - `docs/project-guide.md`: under *Layers*, one paragraph says `app.__main__` sits outside the layers and imports nothing from them. It also gives the exact-match rule, the two exit codes, and why `argparse` is not used.
+
+    The diff matches the Interface: the code and the Interface agree, and the module docstring is present. Nothing is a finding for the coder.
+
+    Cross-read and found current:
+    - `docs/api.md`: the `/health` version text (`importlib.metadata.version("app")`, `0.1.0`) matches the new command's source.
+    - The README's other sections: the `uvicorn` commands, *Where to look next* and *How it is built*.
+    - The rest of `docs/project-guide.md`.
+    - `CLAUDE.md` on the docstring rule for `__main__` and the tests layout: it matches what was built.
+    - I did not edit `docs/openapi.json`, since no route or schema changed.
+
+    Stale text I noticed and did not touch: none that is unrelated to this story.
+
+    Only documents changed, so I did not run `make check`. The factory's check run decides.
+
+    `check`: check: green

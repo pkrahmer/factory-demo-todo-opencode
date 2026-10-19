@@ -21,6 +21,8 @@ One package, `app`, under `src/`:
 
 Boundaries use Pydantic models; the core uses frozen dataclasses.
 
+`app.__main__` sits outside the layers: it is the command-line entry point (`python -m app --version`) and imports nothing from `app.domain`, `app.service`, `app.repository` or `app.api`, a test checks it. `main(argv)` compares the arguments with exactly `["--version"]`: that prints `app <version>` (`importlib.metadata.version("app")`) to stdout and returns 0; anything else, `--help` included, prints `usage: python -m app --version` to stderr and returns 2. It does not use `argparse`, which would add its own `--help` and exit through `SystemExit`.
+
 ## Domain model
 
 ### Todo
