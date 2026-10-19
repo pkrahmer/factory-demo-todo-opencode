@@ -21,6 +21,12 @@ Without `TODO_DB` (or with it empty) the todos are kept in memory and are gone w
 uv run uvicorn app.api.main:app --port 8765
 ```
 
+Check that a running server is up with `GET /health`; it answers `{"status": "ok", "version": "0.1.0", "storage": "memory"}` (`"sqlite"` when `TODO_DB` is set) without touching the todos:
+
+```bash
+curl -s localhost:8765/health
+```
+
 Open <http://localhost:8765/docs> for the interactive schema, or try it from a shell:
 
 ```bash
@@ -31,7 +37,7 @@ curl -s localhost:8765/todos
 ## Where to look next
 
 - `CLAUDE.md`: the rules every change follows (architecture, tests, checks)
-- `docs/api.md`: every endpoint, the title and `PATCH` rules, the error body, where the todos are stored; the schema itself is `docs/openapi.json`
+- `docs/api.md`: every endpoint (todos and `/health`), the title and `PATCH` rules, the error body, where the todos are stored; the schema itself is `docs/openapi.json`
 - `docs/project-guide.md`: the layers and their reasons, the domain model (the `Todo` entity, its title rule, the errors, the repository protocol), the two repositories, the service (the use cases, the clock, the done filter) and the API modules
 
 ## How it is built

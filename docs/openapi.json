@@ -14,6 +14,34 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HealthRead": {
+        "properties": {
+          "status": {
+            "const": "ok",
+            "title": "Status",
+            "type": "string"
+          },
+          "storage": {
+            "enum": [
+              "memory",
+              "sqlite"
+            ],
+            "title": "Storage",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "version",
+          "storage"
+        ],
+        "title": "HealthRead",
+        "type": "object"
+      },
       "TodoCreate": {
         "properties": {
           "title": {
@@ -133,6 +161,27 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/health": {
+      "get": {
+        "operationId": "read_health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Read Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
     "/todos": {
       "get": {
         "operationId": "list_todos_todos_get",
