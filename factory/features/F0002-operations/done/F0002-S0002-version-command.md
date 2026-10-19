@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 1
 attempts: 0
@@ -134,6 +134,11 @@ journal:
   at: '2026-10-19T13:48:16.629004Z'
   stage: smoke-test
   run: 75661846e54c43419d584989ff71f0f6
+- number: 24
+  speaker: factory
+  kind: done
+  at: '2026-10-19T13:49:37.339671Z'
+  stage: approval
 ---
 
 # Version command
@@ -375,3 +380,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
     - **Criteria 4 and 6:** the smoke test does not exercise them. Nothing I saw contradicts them.
 
     I fixed nothing and changed no files. Nothing is open.
+24. factory: done (pull request merged); cost: 10 runs, 4.3 min, 40 turns, 203208 tokens in (505651 more from cache), 16046 out, $1.29
