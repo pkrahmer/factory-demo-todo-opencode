@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T12:48:19.979204Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -56,6 +52,12 @@ journal:
   kind: started
   at: '2026-10-19T12:48:19.979204Z'
   stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T12:48:57.111199Z'
+  stage: review
+  run: fffa5188a4954314b89561db80c95f59
 ---
 
 # Domain model and in-memory repository
@@ -285,3 +287,23 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 15 dead code, in .reports/
 8. factory: started review as opencode-demo.
+9. reviewer: no findings
+
+   I read the work item and `git diff main...HEAD -- . ':!factory'`, which is 6 modules under `src/app` and 4 new test modules, against the criteria and `CLAUDE.md`.
+
+   - **Criteria 1–23:** each has a test that checks what it is named for. Where a criterion names several ways of building a todo (`Todo(...)`, `Todo.new`, `with_title`), they are rows of one parametrized test.
+     - Title length is tested on both sides. Blank titles are refused in criterion 4; 1 and 200 characters are accepted, also with whitespace around them, and 201 is refused, with the exact message, in criterion 5.
+     - A non-UTC `created_at` is converted to UTC (6), and a naive one raises `ValueError` (7).
+     - Unknown ids are three rows of one test, each checking that the repository is still empty afterwards (16).
+     - The `repository` fixture is parametrized over `REPOSITORY_FACTORIES` and typed `-> TodoRepository`, so mypy checks that the repository satisfies the protocol. The no-inheritance check is parametrized over `REPOSITORY_CLASSES` (22).
+     - The domain import test names only the forbidden imports, so it still holds on mutmut's rewritten copy (23).
+     - The coder's entry (journal 7) says `make check` was green.
+   - **Architecture:** `app.domain` imports only the standard library and itself. `app.repository.memory` imports only `app.domain` and does not inherit the protocol. There is no service or API code, and no wiring.
+   - **Security:** no secrets, no suppression markers, no I/O.
+   - **Quality:**
+     - Every title and time rule lives in `Todo.__post_init__`, and `new`, `with_title` and `with_done` all go through it. This is the main decision in journal 7, and it is sound.
+     - In the memory repository, one helper, `_require`, raises `TodoNotFound` for get, update and delete.
+     - Domain modules and their public names have docstrings. The repository modules have the module docstring `CLAUDE.md` asks for.
+   - **Work item:** journal 7 explains the main decision and the rejected alternative, which was a validating factory beside a plain constructor. The Description matches what was built. Criterion 25 still tells the documenter what to write.
+
+   Earlier tests: `git diff --name-status main...HEAD` shows every test file as added (`A`), so no test file that `main` already holds was changed.
