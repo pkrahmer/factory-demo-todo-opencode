@@ -3,15 +3,11 @@ stage: tests
 blocked: null
 round: 0
 attempts: 0
-crashes: 0
+crashes: 1
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T13:39:03.810577Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -33,6 +29,11 @@ journal:
   speaker: factory
   kind: started
   at: '2026-10-19T13:39:03.810577Z'
+  stage: tests
+- number: 5
+  speaker: factory
+  kind: crash
+  at: '2026-10-19T13:40:21.531288Z'
   stage: tests
 ---
 
@@ -101,3 +102,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
    - Scope: this is the feature's Scope item `python -m app --version` and is not in its Out of scope. It matches the feature's decisions 2, 5 and 8 (usage error for any other argument, exact `--version` only, child-process test).
    No questions. No story edits.
 4. factory: started tests as opencode-demo.
+5. factory: crash 1: the run of stage tests ended without a result. Its work is discarded back to commit 6c4ee3a92d80aabcc2e3378ed64fc7cef8f041e8.
