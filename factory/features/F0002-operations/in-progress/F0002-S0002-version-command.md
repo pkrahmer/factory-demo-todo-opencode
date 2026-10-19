@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T13:43:31.534513Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -68,6 +72,11 @@ journal:
   at: '2026-10-19T13:43:10.669238Z'
   stage: review
   run: 101e240662f649aabed2fb63f0c8f363
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:43:31.534513Z'
+  stage: doing
 ---
 
 # Version command
@@ -182,3 +191,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
     - Work item: the Description matches what was built. The journal explains why the coder rejected `argparse`. The docs criterion still says what the README must show.
 
     Earlier tests: none. The diff changes, renames or deletes no test file that `main` already holds; it only adds tests/test_main.py.
+12. factory: started doing as opencode-demo.
