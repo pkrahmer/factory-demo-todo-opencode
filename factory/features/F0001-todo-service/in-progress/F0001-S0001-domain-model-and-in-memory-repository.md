@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T12:44:54.661724Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -34,6 +30,12 @@ journal:
   kind: started
   at: '2026-10-19T12:44:54.661724Z'
   stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-10-19T12:46:36.144058Z'
+  stage: tests
+  run: c6fe28f8d77741858a4082e8c6b6a5b5
 ---
 
 # Domain model and in-memory repository
@@ -204,3 +206,37 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
      - `docs/project-guide.md` does not exist yet; criterion 25 has the documenter create it. The README already has a *Where to look next* section to extend.
    - Scope: it stays inside feature scope (entity, title rule, timestamps, errors, protocol, in-memory repository). It stays out of the SQLite repository (S0004), the service (S0002) and the API (S0003). It changes no other story's tests. It is consistent with feature decisions 1–4 and 15.
 4. factory: started tests as opencode-demo.
+5. tester: I wrote red tests for criteria 1–23 against the Interface; `make lint` is green, and I skipped the type check as the stage says. One run of `make test` ended with `1 failed, 3 errors`: three test modules could not be imported, and the import check fails because `src/app/domain` has no modules yet. No criterion needed interpreting.
+
+   Criterion → test:
+   - criterion 1: tests/domain/test_model.py::test_new_gives_an_open_todo_with_a_uuid4_id
+   - criterion 2: tests/domain/test_model.py::test_new_gives_a_fresh_id_on_every_call
+   - criterion 3: tests/domain/test_model.py::test_title_is_stripped_of_surrounding_whitespace (rows: constructor, new, with_title)
+   - criterion 4: tests/domain/test_model.py::test_blank_title_is_rejected (`""`, `"   "`, `"\n\t"` × the three ways of building)
+   - criterion 5: tests/domain/test_model.py::test_title_length_is_limited_to_200_characters (1, 200, both with whitespace around them, and 201 × the three ways of building)
+   - criterion 6: tests/domain/test_model.py::test_created_at_is_converted_to_utc (constructor, new)
+   - criterion 7: tests/domain/test_model.py::test_naive_created_at_is_rejected_with_value_error (constructor, new)
+   - criterion 8: tests/domain/test_model.py::test_with_title_returns_a_new_todo_and_keeps_the_original
+   - criterion 9: tests/domain/test_model.py::test_with_done_returns_a_new_todo_and_keeps_the_original
+   - criterion 10: tests/domain/test_model.py::test_todo_fields_cannot_be_assigned (one row per field)
+   - criterion 11: tests/domain/test_errors.py::test_todo_not_found_carries_the_id_and_names_it
+   - criterion 12: tests/domain/test_errors.py::test_duplicate_todo_carries_the_id_and_names_it
+   - criterion 13: tests/domain/test_errors.py::test_domain_errors_share_the_todo_error_base
+   - criterion 14: tests/repository/test_contract.py::test_added_todo_can_be_read_back
+   - criterion 15: tests/repository/test_contract.py::test_adding_a_stored_id_is_rejected
+   - criterion 16: tests/repository/test_contract.py::test_unknown_id_is_not_found (rows: get, update, delete; each row checks that `list_all()` is still `[]`)
+   - criterion 17: tests/repository/test_contract.py::test_empty_repository_lists_nothing
+   - criterion 18: tests/repository/test_contract.py::test_todos_are_listed_oldest_first
+   - criterion 19: tests/repository/test_contract.py::test_todos_created_at_the_same_time_are_listed_by_id
+   - criterion 20: tests/repository/test_contract.py::test_update_replaces_the_stored_todo
+   - criterion 21: tests/repository/test_contract.py::test_deleted_todo_is_gone
+   - criterion 22: tests/repository/test_contract.py::test_repository_does_not_inherit_the_protocol (one row per entry in the module-level `REPOSITORY_CLASSES`). The `repository` fixture is parametrized over `REPOSITORY_FACTORIES` (`Callable[[Path], TodoRepository]`, called with `tmp_path`) and annotated `-> TodoRepository`, so mypy checks that each repository satisfies the protocol.
+   - criterion 23: tests/domain/test_imports.py::test_domain_imports_no_framework_and_no_outer_layer. It parses every module under `src/app/domain` with `ast`, works out relative imports, and names only the banned imports: fastapi, pydantic, sqlalchemy, and any `app` module outside `app.domain`. It also fails when the folder has no modules.
+   - criteria 24 and 25 are the closing `make check` and docs criteria; they have no tests.
+
+   Files created: tests/domain/__init__.py, tests/domain/test_model.py, tests/domain/test_errors.py, tests/domain/test_imports.py, tests/repository/__init__.py, tests/repository/test_contract.py. I changed no earlier test file.
+
+   Modules the test run could not import: app.domain.errors, app.domain.model, app.domain.repository, app.repository.memory.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 1 failed, 3 errors in 1.74s
