@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T14:06:05.480257Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -45,6 +41,12 @@ journal:
   kind: started
   at: '2026-10-19T14:06:05.480257Z'
   stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-10-19T14:07:09.411828Z'
+  stage: doing
+  run: d1f4508ce98e4471a9971e1d03d539fe
 ---
 
 # Title search
@@ -149,3 +151,20 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
    `lint`: lint: green (0.0 s)
    `test`: 12 failed, 175 passed, 20 warnings in 4.30s
 6. factory: started doing as opencode-demo.
+7. coder: Implemented title search against the tester's tests. I changed no tests.
+
+   What I built:
+   - `src/app/service/todo_service.py`: `TodoService.list(*, done=None, search=None)` takes the repository's list and filters it in two steps. If `done` is given, it keeps only todos with that flag. It then strips `search` and applies `str.casefold`; if anything is left, it keeps only todos whose casefolded title contains that text. Creation order is unchanged. The docstring now covers both filters.
+   - `src/app/api/routes.py`: `list_todos` takes `search: Annotated[str | None, Query(max_length=MAX_TITLE_LENGTH)] = None`, with `MAX_TITLE_LENGTH` imported from `app.domain.model`, and passes it to the service. The schema checks the limit on the text as sent, so a search over 200 characters gets a 422. The existing handler in `app.api.errors` produces the `query.search: ...` detail.
+   - `docs/openapi.json`: regenerated with `make openapi`.
+
+   Main decision: the service narrows one list step by step, so `None`, an empty search and a blank search all go through the same "no title filter" path. The alternative I rejected was a single list comprehension with one condition for `done` and one for search. It saves a pass over the list, but it is harder to read, and the lists are small.
+
+   Refactor pass: I read the diff once more and found nothing to change.
+
+   Noticed, not touched: pytest prints a `StarletteDeprecationWarning` about `httpx` in `fastapi.testclient`. It comes from the installed dependencies and was there before this change. Criterion 12 (the docs) belongs to the documenter.
+
+   make check: check: green (187 passed).
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/

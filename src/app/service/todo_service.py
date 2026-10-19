@@ -47,12 +47,19 @@ class TodoService:
         """Return the todo; raise `TodoNotFound` if there is none."""
         return self._repository.get(todo_id)
 
-    def list(self, *, done: bool | None = None) -> list[Todo]:
-        """Return the todos in creation order; with `done` given, only those with that flag."""
+    def list(self, *, done: bool | None = None, search: str | None = None) -> list[Todo]:
+        """Return the todos in creation order, narrowed by `done` and by `search`.
+
+        With `done` given, only the todos with that flag; with `search` given and not blank,
+        only those whose title contains the stripped text, compared after case folding.
+        """
         todos = self._repository.list_all()
-        if done is None:
-            return todos
-        return [todo for todo in todos if todo.done is done]
+        if done is not None:
+            todos = [todo for todo in todos if todo.done is done]
+        needle = (search or "").strip().casefold()
+        if needle:
+            todos = [todo for todo in todos if needle in todo.title.casefold()]
+        return todos
 
     def stats(self) -> TodoStats:
         """Count the open and the done todos over one listing of the repository."""

@@ -1,11 +1,13 @@
 """The todo endpoints."""
 
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Query, status
 
 from app.api.dependencies import Service
 from app.api.schemas import TodoCreate, TodoRead, TodoUpdate
+from app.domain.model import MAX_TITLE_LENGTH
 
 router = APIRouter(prefix="/todos", tags=["todos"])
 
@@ -16,8 +18,12 @@ def create_todo(body: TodoCreate, service: Service) -> TodoRead:
 
 
 @router.get("")
-def list_todos(service: Service, done: bool | None = None) -> list[TodoRead]:
-    return [TodoRead.from_domain(todo) for todo in service.list(done=done)]
+def list_todos(
+    service: Service,
+    done: bool | None = None,
+    search: Annotated[str | None, Query(max_length=MAX_TITLE_LENGTH)] = None,
+) -> list[TodoRead]:
+    return [TodoRead.from_domain(todo) for todo in service.list(done=done, search=search)]
 
 
 @router.get("/{todo_id}")
