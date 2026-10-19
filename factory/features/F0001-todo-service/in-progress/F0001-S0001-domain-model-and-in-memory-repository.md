@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: docs
-  started_at: '2026-10-19T12:49:17.423979Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -67,6 +63,12 @@ journal:
   kind: started
   at: '2026-10-19T12:49:17.423979Z'
   stage: docs
+- number: 11
+  speaker: documenter
+  kind: result
+  at: '2026-10-19T12:49:58.069249Z'
+  stage: docs
+  run: d96f959fa54a4e5d9ad4b5dfd57c4c48
 ---
 
 # Domain model and in-memory repository
@@ -317,3 +319,23 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
 
    Earlier tests: `git diff --name-status main...HEAD` shows every test file as added (`A`), so no test file that `main` already holds was changed.
 10. factory: started docs as opencode-demo.
+11. documenter: Files changed:
+    - `docs/project-guide.md` (new): `docs/` was empty, so I created the guide for criterion 25. It has these parts:
+      - The layers: a table of what each may import, why `app.service` and `app.repository` never import each other, and what `make layers` and the domain import test enforce.
+      - The domain model: the `Todo` fields; the title rule (strip first, then 1 to 200 characters, with the two exact messages); UTC conversion and `ValueError` for a naive time; the frozen, copy-on-change behaviour; and the fact that every rule sits in `__post_init__`.
+      - The three errors (`InvalidTitle`, `TodoNotFound`, `DuplicateTodo`): what each carries and its message.
+      - The repository protocol: each method's behaviour and the ordering (`created_at`, then id ascending).
+      - The in-memory repository, and how a later repository joins the contract suite (`REPOSITORY_FACTORIES` and `REPOSITORY_CLASSES` in `tests/repository/test_contract.py`).
+      - The smoke-test snippet as a runnable example. I ran it, and the output matches.
+    - `README.md`: *Where to look next* now links `docs/project-guide.md`.
+
+    Cross-read and found current:
+    - `README.md`: the rest of the text is still true. It describes the finished service as a goal, and the story builds only the first part of it.
+    - `CLAUDE.md`: the layer rules match the code and the import-linter contract in `pyproject.toml`.
+    - `docs/openapi.json` and `docs/api.md` do not exist, and no route or schema exists yet, so there was nothing to update.
+
+    Seen and not touched:
+    - `CLAUDE.md` names `docs/decisions.md` and `docs/api.md`, but neither exists yet. I did not create them, because this story's docs criterion does not ask for them. I did not link to them either.
+    - The guide says the API layer maps errors to status codes. That is the architecture rule in `CLAUDE.md`, not code that exists yet, and the guide does not claim otherwise.
+
+    `check`: check: green
