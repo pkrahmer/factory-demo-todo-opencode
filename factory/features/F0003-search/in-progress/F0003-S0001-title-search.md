@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: smoke-test
+  started_at: '2026-10-19T14:14:16.556700Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -113,6 +117,11 @@ journal:
   at: '2026-10-19T14:13:55.958007Z'
   stage: docs
   run: 7dc01b661299410eb620f282b8f57af5
+- number: 20
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:14:16.556700Z'
+  stage: smoke-test
 ---
 
 # Title search
@@ -369,3 +378,4 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
     Stale text noticed, not touched: nothing related to this story. The `StarletteDeprecationWarning` from the installed dependencies, which the coder already noted, is not a documentation matter.
 
     `check`: check: green
+20. factory: started smoke-test as opencode-demo.
