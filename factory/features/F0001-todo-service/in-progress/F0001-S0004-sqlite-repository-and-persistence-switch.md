@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: docs
+  started_at: '2026-10-19T13:19:50.013263Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -80,6 +84,11 @@ journal:
   at: '2026-10-19T13:19:29.770721Z'
   stage: review
   run: 80ced7fffb604eff9bbf70fe03948009
+- number: 14
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:19:50.013263Z'
+  stage: docs
 ---
 
 # SQLite repository and persistence switch
@@ -281,3 +290,4 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
     Earlier tests changed:
     - tests/repository/test_contract.py: the human's leave in the story's Interface (the `_sqlite` factory and the `SqliteTodoRepository` row in `REPOSITORY_CLASSES`), plus the standing leave in `CLAUDE.md` to move a shared helper (`make_todo` and the copy of `T0` now come from `tests/fakes.py`). Every test keeps its name and what it checks.
     - tests/fakes.py: the standing leave to move a shared helper (`make_todo` moved in). Nothing already in the file changed.
+14. factory: started docs as opencode-demo.
