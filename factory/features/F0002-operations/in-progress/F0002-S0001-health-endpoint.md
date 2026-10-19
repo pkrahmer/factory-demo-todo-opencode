@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T13:31:16.163079Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -25,6 +29,11 @@ journal:
   at: '2026-10-19T13:30:55.045991Z'
   stage: intake
   run: a14eb8c6760d40aca044472b95c164b0
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:31:16.163079Z'
+  stage: tests
 ---
 
 # Health endpoint
@@ -114,3 +123,4 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
    - Smoke test: Runnable as written, with `uv run python -c` against `build_app({})` through `TestClient`. The `Expect:` line gives one exact output, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`, which matches the current `pyproject.toml` version.
    - Architecture: Fits the layers. `app.api` holds the router, schema and wiring, and `build_app` sits in the composition root, which is the only place that chooses the concrete repository. `/health` reads the storage kind from app state and never touches the service or repository. `HealthRead` is a Pydantic boundary model. No new dependency.
    - Scope: Inside F0002's scope (`GET /health`: status, version, storage kind). It touches nothing in "Out of scope". Feature decisions 1, 6 and 7 are each covered by a criterion (4, 3, 5).
+4. factory: started tests as opencode-demo.
