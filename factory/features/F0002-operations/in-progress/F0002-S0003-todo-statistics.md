@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T13:52:06.878891Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -36,6 +40,11 @@ journal:
   at: '2026-10-19T13:51:46.270472Z'
   stage: tests
   run: dc67d5f03e3d4a8399999685d64e5643
+- number: 6
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:52:06.878891Z'
+  stage: doing
 ---
 
 # Todo statistics
@@ -152,3 +161,4 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
 
    `lint`: lint: green (0.0 s)
    `test`: 3 failed, 165 passed, 20 warnings, 1 error in 3.93s
+6. factory: started doing as opencode-demo.
