@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T13:15:12.155369Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -45,6 +41,12 @@ journal:
   kind: started
   at: '2026-10-19T13:15:12.155369Z'
   stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-10-19T13:16:27.076349Z'
+  stage: doing
+  run: 01c39c026a3946fbb90546ad85a1237d
 ---
 
 # SQLite repository and persistence switch
@@ -168,3 +170,32 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
    `lint`: lint: green (0.0 s)
    `test`: 109 passed, 20 warnings, 3 errors in 3.31s
 6. factory: started doing as opencode-demo.
+7. coder: Built:
+   - `src/app/repository/sqlite.py` (new): `SqliteTodoRepository`.
+     - The `todos` table is a Core `Table` with the four columns the Interface names: `id`, `title`, `done`, `created_at`.
+     - `__init__` runs `create_all(checkfirst=True)`, so an existing table and its rows are left alone.
+     - `from_path` builds a `sqlite:///<path>` engine.
+     - Every statement is a Core `insert`/`select`/`update`/`delete`, with no SQL in strings.
+     - A duplicate id is caught as `IntegrityError` and raised as `DuplicateTodo`.
+     - `update` or `delete` that touches no row raises `TodoNotFound`.
+   - `src/app/api/main.py`: `build_repository(environ)` returns `InMemoryTodoRepository()` when `TODO_DB` is missing or empty, and `SqliteTodoRepository.from_path(...)` otherwise. `app = create_app(TodoService(build_repository(os.environ)))`.
+   - `make openapi` was run; `docs/openapi.json` is unchanged.
+   - `make check` is green: 146 passed, 100% coverage.
+
+   Main decision: the database sorts the list itself (`ORDER BY created_at, id`).
+   - `created_at` is stored in a fixed-width form, `%Y-%m-%dT%H:%M:%S.%f+00:00`: microseconds always written, offset always `+00:00`. Text order is then time order.
+   - The hyphenated UUID text is also fixed-width lowercase hex, so its text order is the UUID order.
+   - One helper, `_with_todo_values`, sets the column values for both insert and update. It is a generic over `Insert | Update`, so no bare dict crosses a function boundary.
+   - Rejected: `isoformat()` plus sorting in Python. `isoformat()` leaves out the microseconds when they are zero, so the stored text would not sort by time. Sorting in Python would also duplicate the in-memory repository's sort.
+
+   Refactor: I read the diff once. Nothing needed changing beyond what was already done while getting the checks green: `Any` replaced by `Update | Delete` on the one-row helper, and a PEP 695 type parameter that ruff's UP047 asks for.
+
+   Noticed, not touched:
+   - `_todo_from_row` takes `Row[Any]`, since that is what SQLAlchemy returns for a `select` on a `Table`. The `Todo` constructor checks the values right away.
+   - `TestClient` emits a Starlette deprecation warning about `httpx`; it was already there before this story.
+   - Each `from_path` creates its own engine and never disposes it. That is harmless for a long-running server and for the tests.
+
+   Description unchanged: no journal entry changed the meaning of the task.
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
