@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T12:56:01.714482Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -56,6 +52,12 @@ journal:
   kind: started
   at: '2026-10-19T12:56:01.714482Z'
   stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T12:56:29.374578Z'
+  stage: review
+  run: 27ab09a632b94a1880a61417574b7a15
 ---
 
 # Service layer with filtering
@@ -220,3 +222,25 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
 8. factory: started review as opencode-demo.
+9. reviewer: no findings
+
+   What I reviewed: the diff from main, excluding `factory/` (`src/app/service/__init__.py`, `src/app/service/todo_service.py`, `tests/service/__init__.py`, `tests/service/test_todo_service.py`), plus the work item.
+
+   - **Acceptance criteria:** each of criteria 1–15 has a test in `tests/service/test_todo_service.py`, and each test checks what its criterion says.
+     - Criterion 5 is one parametrized test with rows done, open and all, over todos created alternately.
+     - Criterion 13 is one parametrized test with four rows, and each row checks the id carried by `TodoNotFound`.
+     - Both blank-title rules test their refused side, with the rows empty and spaces. After the refusal, the tests check that nothing was stored (criterion 2) and that the old title is kept (criterion 7).
+     - Criteria 14 and 15 compare `utcoffset()` with `timedelta(0)`. A naive datetime fails that check, so timezone awareness is tested too.
+     - The Interface states no limit of its own. The 200-character title rule stays in the domain and is tested there.
+     - The factory's `make check` after the coder was green (entry 7).
+   - **Architecture:** `app.service.todo_service` imports only `app.domain.model`, `app.domain.repository` and the standard library. It reaches storage only through the `TodoRepository` protocol. Only the test imports `InMemoryTodoRepository`, which the Interface allows.
+   - **Security:** no secrets, no shell or SQL, and no markers that silence a check.
+   - **Quality:**
+     - Every public name in `app.service` has a docstring, and each says what the code does.
+     - `_store` removes the repeated "update, then return" from the three update methods.
+     - The done filter compares `todo.done is done`, keeps the repository's order, and leaves the protocol unchanged.
+     - The method name `list` hides the built-in, but its own `-> list[Todo]` annotation is evaluated before the name is bound, so it still means the built-in.
+     - There is no copied helper. `TickingClock` and `_assert_utc_close_to_now` exist nowhere else under `tests/`. `T0` is a test-data constant that the domain and repository test modules each define too, not a helper.
+   - **Work item hygiene:** entry 7 explains the main decision and the alternative it rejected: filtering in the service rather than adding a filtered list method to the protocol. The Description matches what was built, and criterion 17 still says what `docs/project-guide.md` must cover.
+
+   Earlier tests: none. Every test file in the diff is new (status `A`), and no test file that `main` already holds was changed.
