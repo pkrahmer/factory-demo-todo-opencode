@@ -9,22 +9,10 @@ import pytest
 from app.domain.errors import InvalidTitle, TodoNotFound
 from app.repository.memory import InMemoryTodoRepository
 from app.service.todo_service import TodoService, utc_now
+from tests.fakes import T0, TickingClock
 
-T0 = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)
 UNKNOWN_ID = UUID(int=42)
 BLANK_TITLES = [pytest.param("", id="empty"), pytest.param("   ", id="spaces")]
-
-
-class TickingClock:
-    """A clock that starts at T0 and moves a minute ahead on every call."""
-
-    def __init__(self) -> None:
-        self._calls = 0
-
-    def __call__(self) -> datetime:
-        moment = T0 + timedelta(minutes=self._calls)
-        self._calls += 1
-        return moment
 
 
 @pytest.fixture

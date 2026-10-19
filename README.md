@@ -9,10 +9,24 @@ uv sync       # install
 make check    # everything the pipeline checks: lint, types, layers, static analysis, secrets, licences, tests
 ```
 
+Start the server (todos are kept in memory, so they are gone when it stops):
+
+```bash
+uv run uvicorn app.api.main:app --port 8765
+```
+
+Open <http://localhost:8765/docs> for the interactive schema, or try it from a shell:
+
+```bash
+curl -s -X POST localhost:8765/todos -H 'content-type: application/json' -d '{"title": "Buy milk"}'
+curl -s localhost:8765/todos
+```
+
 ## Where to look next
 
 - `CLAUDE.md`: the rules every change follows (architecture, tests, checks)
-- `docs/project-guide.md`: the layers and their reasons, the domain model (the `Todo` entity, its title rule, the errors, the repository protocol) and the service (the use cases, the clock, the done filter)
+- `docs/api.md`: every endpoint, the title and `PATCH` rules, the error body; the schema itself is `docs/openapi.json`
+- `docs/project-guide.md`: the layers and their reasons, the domain model (the `Todo` entity, its title rule, the errors, the repository protocol), the service (the use cases, the clock, the done filter) and the API modules
 
 ## How it is built
 

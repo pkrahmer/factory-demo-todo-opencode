@@ -1,0 +1,17 @@
+"""Test doubles shared by the test modules of several layers."""
+
+from datetime import UTC, datetime, timedelta
+
+T0 = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)
+
+
+class TickingClock:
+    """A clock that starts at T0 and moves a minute ahead on every call."""
+
+    def __init__(self) -> None:
+        self._calls = 0
+
+    def __call__(self) -> datetime:
+        moment = T0 + timedelta(minutes=self._calls)
+        self._calls += 1
+        return moment
