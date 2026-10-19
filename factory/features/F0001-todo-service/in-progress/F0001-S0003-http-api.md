@@ -1,5 +1,5 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: intake
-  started_at: '2026-10-19T13:02:58.046467Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -40,6 +36,12 @@ journal:
   kind: started
   at: '2026-10-19T13:02:58.046467Z'
   stage: intake
+- number: 6
+  speaker: intake
+  kind: result
+  at: '2026-10-19T13:03:18.813385Z'
+  stage: intake
+  run: 16fd4f3640864aeb846e2def3e583c46
 ---
 
 # HTTP API
@@ -125,7 +127,7 @@ Tests: `tests/api/test_todos.py` through FastAPI's `TestClient` against `create_
 
 1. `POST /todos` with `{"title": "Buy milk"}` returns 201 and a body with exactly the keys `id`, `title`, `done`, `created_at`: a UUID, `"Buy milk"`, `false`, and an ISO 8601 timestamp whose offset is UTC (`Z` or `+00:00`).
 2. `POST /todos` with `{"title": "   "}` returns 422 and the body `{"detail": "title must not be blank"}`.
-3. The length rule on both sides, as rows of one parametrized test: `POST /todos` with a 200-character title returns 201; with a 201-character title it returns 422 and the body `{"detail": "title must be at most 200 characters"}`.
+3. The length rule on both sides, as rows of one parametrized test: `POST /todos` with a 200-character title returns 201; with a 201-character title it returns 422 and the body `{"detail": "title must be at most 200 characters"}`; with a title of 200 characters and surrounding spaces it returns 201.
 4. `POST /todos` with `{}` returns 422 and the body `{"detail": "body.title: Field required"}`.
 5. `GET /todos` returns 200 and every todo, in creation order.
 6. The done filter, as rows of one parametrized test: `GET /todos?done=true` returns only the completed todos, and `GET /todos?done=false` only the open ones.
@@ -146,8 +148,9 @@ Tests: `tests/api/test_todos.py` through FastAPI's `TestClient` against `create_
 21. `docs/openapi.json`, parsed as JSON, equals `app.openapi()` of `app.api.main.app`.
 22. The schema of `app.api.main.app` names the paths `/todos` and `/todos/{todo_id}` with the tag `todos`.
 23. Of the `app.api` modules, only `app.api.main` imports `app.repository`.
-24. `make check` stays green.
-25. docs: `docs/api.md` describes each endpoint (method, path, body, success and error statuses), the title rules, the error body `{"detail": "…"}` and the `PATCH` rules, with a curl example for creating and for listing; the README's *Getting started* shows how to start the server and names `/docs` for the interactive schema, and its *Where to look next* links `docs/api.md`.
+24. `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`.
+25. `make check` stays green.
+26. docs: `docs/api.md` describes each endpoint (method, path, body, success and error statuses), the title rules, the error body `{"detail": "…"}` and the `PATCH` rules, with a curl example for creating and for listing; the README's *Getting started* shows how to start the server and names `/docs` for the interactive schema, and its *Where to look next* links `docs/api.md`.
 
 ## Smoke test
 
@@ -201,3 +204,30 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    - Scope: inside the feature's scope (HTTP API, one error shape, committed OpenAPI) and not in its "Out of scope".
 4. 2026-10-19 human: (c), both. Add the criterion before the two closing ones: `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`. And add the row to criterion 3's parametrized test: a title of 200 characters with surrounding spaces returns 201. The title is stripped first, then the domain's length and blank rules apply; the schema puts no length or blank rule of its own on `title`.
 5. factory: started intake as opencode-demo.
+6. intake: accepted. The human's answer (journal entry 4, option (c)) is written into the story. Nothing else is changed.
+   - Criterion 3 gets a row: a title of 200 characters with surrounding spaces returns 201.
+   - A new criterion 24 is added before the two closing ones: `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`. `make check` is now criterion 25 and `docs:` is 26. Criteria 21–23 keep their numbers, so the Interface's references to them still hold.
+   - The Description is unchanged. It already says the schema puts no rule on `title`. The feature's decision 18 states the same.
+
+   Checks, re-run with the answer in:
+   - Interface: it names concrete modules and signatures (`schemas.py`, `dependencies.py`, `errors.py`, `routes.py`, `app.py`, `main.py`). It matches the existing `TodoService` methods (`create`, `get`, `list(done=)`, `rename`, `complete`, `reopen`, `delete`). `make openapi` exists in the Makefile, and `docs/openapi.json` is in the coder's write paths.
+   - Criteria: each is testable by one test function.
+     - Every behaviour the Interface states has a criterion, and every rule has one for its failing side.
+     - Title stripping on POST: criterion 24, plus the padded row of criterion 3.
+     - Title stripping on PATCH: criterion 11.
+     - Blank title: criteria 2 and 13.
+     - Length limit on both sides: criterion 3.
+     - Missing field: criterion 4.
+     - Bad `done` query value: criterion 7.
+     - Bad id: criterion 9.
+     - Unknown id: criterion 16.
+     - Empty or null PATCH body: criterion 12.
+     - PATCH order, with an invalid title changing nothing: criteria 13 and 14.
+     - Error body shape: criterion 20.
+     - Service wiring: criteria 17 and 19.
+     - App title: criterion 18.
+     - OpenAPI file and paths: criteria 21 and 22.
+     - Import rule: criterion 23.
+   - Smoke test: the commands are runnable (uvicorn on port 8765 with a cleanup trap). The `Expect:` line gives five checkable lines that match the five commands that print.
+   - Architecture: it matches `CLAUDE.md`. Only `app.api.main` wires the repository, and criterion 23 tests that. Errors map in one place. Boundaries are Pydantic models, and `get_service` lives in `dependencies.py`.
+   - Scope: inside the feature's scope (HTTP API, one error shape, committed OpenAPI schema). It touches nothing in the "Out of scope" list, and it adds no operations endpoints.
