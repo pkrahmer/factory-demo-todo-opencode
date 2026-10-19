@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T12:46:56.392262Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -45,6 +41,12 @@ journal:
   kind: started
   at: '2026-10-19T12:46:56.392262Z'
   stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-10-19T12:47:59.671056Z'
+  stage: doing
+  run: 8c70c87b96b94017ad9f1aa2fcc1c9d9
 ---
 
 # Domain model and in-memory repository
@@ -250,3 +252,26 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
    `lint`: lint: green (0.0 s)
    `test`: 1 failed, 3 errors in 1.74s
 6. factory: started doing as opencode-demo.
+7. coder: I built the domain layer and the in-memory repository to the Interface. `make check` is green: 56 tests pass with 100% coverage, and the layers contract holds. I changed no test.
+
+   What I built:
+   - `src/app/domain/__init__.py` and `src/app/repository/__init__.py`: package docstrings only.
+   - `src/app/domain/errors.py`: `TodoError`, plus `InvalidTitle`, `TodoNotFound` and `DuplicateTodo`. The last two keep `todo_id` and build their message from it.
+   - `src/app/domain/model.py`: `MAX_TITLE_LENGTH` and the frozen, slotted `Todo`.
+     - `__post_init__` strips and checks the title through `_normalized_title`, and converts `created_at` to UTC through `_in_utc`. A naive `created_at` raises `ValueError`.
+     - `new` uses `uuid4()` and `done=False`.
+     - `with_title` and `with_done` use `dataclasses.replace`.
+   - `src/app/domain/repository.py`: the `TodoRepository` protocol. Its docstrings state the errors and the ordering (`created_at`, then id ascending).
+   - `src/app/repository/memory.py`: `InMemoryTodoRepository`. It keeps a dict by id, satisfies the protocol structurally and does not inherit it. `list_all` sorts by `(created_at, id)`. A shared `_require` raises `TodoNotFound` for get, update and delete.
+
+   Main decision: every rule lives in `Todo.__post_init__`, so `new`, `with_title` and `with_done` all go through the constructor (by `cls(...)` or `replace`). The rules therefore hold however a todo is built, with no second copy of the checks. I rejected a validating factory beside a plain constructor: `Todo(...)` must enforce the rules too (criteria 3–7), and two paths could drift apart. Because the dataclass is frozen, normalising a field uses `object.__setattr__`; a comment in the code gives the reason.
+
+   Refactor pass: I rewrote the memory module's docstring, which promised a use (a server without a file) that does not exist. Nothing else needed changing.
+
+   Noticed, not touched:
+   - No route or schema exists yet, so I did not run `make openapi`.
+   - `docs/project-guide.md` and the README link (criterion 25) are the documenter's.
+   - The journal did not change the meaning of the task, so `## Description` is unchanged.
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 15 dead code, in .reports/
