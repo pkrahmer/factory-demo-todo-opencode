@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T12:54:46.987156Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -45,6 +41,12 @@ journal:
   kind: started
   at: '2026-10-19T12:54:46.987156Z'
   stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-10-19T12:55:41.439338Z'
+  stage: doing
+  run: f7d28482eb034c8281d3e61214ef674c
 ---
 
 # Service layer with filtering
@@ -187,3 +189,24 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
    `lint`: lint: green (0.0 s)
    `test`: 56 passed, 1 error in 1.62s
 6. factory: started doing as opencode-demo.
+7. coder: I added the service layer. `make check` is green: 78 tests passed and coverage is 100 %. The first smoke-test block prints the three expected lines.
+
+   What I built:
+   - `src/app/service/__init__.py`: the new package, holding only its module docstring.
+   - `src/app/service/todo_service.py`: `Clock`, `utc_now()`, which returns `datetime.now(UTC)`, and `TodoService`, with the signatures the Interface gives.
+     - `create` builds the todo with `Todo.new(title, now=clock())` and then stores it with `add`. A bad title fails before anything is stored, so the domain's `InvalidTitle` reaches the caller unchanged.
+     - `get` and `delete` hand straight on to the repository, which raises `TodoNotFound` itself.
+     - `list(done=None)` returns `list_all()` as it comes, so the order is the repository's. With `done` set, it keeps only the todos with that flag, in the same order.
+     - `rename`, `complete` and `reopen` each read the todo, change it with `with_title` or `with_done`, and then pass it to a private `_store` helper. `_store` calls `update` and returns the changed todo.
+
+   Main design decision: the done filter runs in the service, over `list_all()`. The alternative I rejected was adding a filtered list method to the `TodoRepository` protocol. That would change the domain protocol and the in-memory repository, which is outside this story, and the Interface gives the filter to the service.
+
+   Refactor pass: I read my own diff. The only cleanup needed was the `_store` helper, so that the three update methods do not each repeat "update, then return". Nothing else needed changing.
+
+   Noticed but not touched:
+   - The method name `list` hides the built-in `list` inside the class body. Its own return annotation still works, and mypy is happy. Any later method in the class that needs a `list[...]` annotation would run into this, though.
+   - No journal entry changed the meaning of the task, so I left `## Description` as it was.
+   - I did not write the docs criterion (`docs/project-guide.md`): that file belongs to the documenter stage.
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
