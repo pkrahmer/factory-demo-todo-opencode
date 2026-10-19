@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T12:53:33.013798Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -34,6 +30,12 @@ journal:
   kind: started
   at: '2026-10-19T12:53:33.013798Z'
   stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-10-19T12:54:25.555009Z'
+  stage: tests
+  run: 43eff077b37f4883af1d566f2ef20456
 ---
 
 # Service layer with filtering
@@ -150,3 +152,28 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
    - Architecture: the service depends on the `TodoRepository` protocol and the domain only, with no import of `app.repository` or `app.api`. The clock lives in the service, as the Description says. Tests go in `tests/service/` and use the in-memory repository, as `CLAUDE.md` asks. There are no new dependencies and no change to `factory/`.
    - Scope: this is the "service layer: create, get, list with a done filter, rename, complete, reopen, delete" item of `feature.md`, with no API and no storage change. Nothing is in "Out of scope". Feature decisions 5 and 17 are carried by criteria 9, 11 and 5.
 4. factory: started tests as opencode-demo.
+5. tester: I wrote the service tests against the Interface. The concrete repository is `InMemoryTodoRepository`. One fixture uses a clock fixed at 2026-10-04 12:00 UTC. A second uses a clock that moves a minute ahead on every call, for the tests where order must be visible. The blank-title criteria have two rows each, an empty title and one of only spaces. The 200-character title limit is not tested here: the Interface does not state it, and it stays in the domain, which already tests it. No criterion needed interpreting.
+
+   - criterion 1: tests/service/test_todo_service.py::test_create_strips_the_title_and_stamps_the_clock
+   - criterion 2: tests/service/test_todo_service.py::test_create_with_a_blank_title_is_rejected_and_stores_nothing
+   - criterion 3: tests/service/test_todo_service.py::test_get_with_an_unknown_id_is_not_found
+   - criterion 4: tests/service/test_todo_service.py::test_list_returns_every_todo_in_creation_order
+   - criterion 5: tests/service/test_todo_service.py::test_list_filters_by_the_done_flag (rows done, open, all)
+   - criterion 6: tests/service/test_todo_service.py::test_rename_changes_only_the_title
+   - criterion 7: tests/service/test_todo_service.py::test_rename_with_a_blank_title_is_rejected_and_keeps_the_old_title
+   - criterion 8: tests/service/test_todo_service.py::test_complete_marks_the_todo_done
+   - criterion 9: tests/service/test_todo_service.py::test_completing_a_completed_todo_keeps_it_done
+   - criterion 10: tests/service/test_todo_service.py::test_reopen_marks_the_todo_open
+   - criterion 11: tests/service/test_todo_service.py::test_reopening_an_open_todo_keeps_it_open
+   - criterion 12: tests/service/test_todo_service.py::test_delete_removes_the_todo
+   - criterion 13: tests/service/test_todo_service.py::test_changing_an_unknown_id_is_not_found (rows rename, complete, reopen, delete)
+   - criterion 14: tests/service/test_todo_service.py::test_utc_now_is_the_current_time_in_utc
+   - criterion 15: tests/service/test_todo_service.py::test_service_without_a_clock_stamps_the_current_utc_time
+   - criteria 16 and 17 (`make check`, docs) have no test of their own.
+
+   Files created: tests/service/__init__.py, tests/service/test_todo_service.py. No earlier test file was changed.
+
+   Could not import: `app.service.todo_service`, because the `app.service` package does not exist yet. That is the expected red: `make test` gave 56 passed and 1 import error, in tests/service/test_todo_service.py. `make lint` is green.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 56 passed, 1 error in 1.62s
