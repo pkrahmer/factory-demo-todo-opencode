@@ -1,17 +1,13 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: intake
-  started_at: '2026-10-19T13:38:21.085124Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,12 @@ journal:
   kind: started
   at: '2026-10-19T13:38:21.085124Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-10-19T13:38:43.690691Z'
+  stage: intake
+  run: 63fc321dfb3c481f9390f7304eae1302
 ---
 
 # Version command
@@ -76,3 +78,16 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
 
 1. 2026-10-19 human: created.
 2. factory: started intake as opencode-demo.
+3. intake: accepted
+   - Interface: `src/app/__main__.py` is not built yet. It names one concrete function, `main(argv: list[str] | None = None) -> int`, with the `argv` default (`sys.argv[1:]`), the output stream and the return value for each case, and the `sys.exit(main())` guard. The version source `importlib.metadata.version("app")` matches `pyproject.toml` (name `app`, version `0.1.0`) and the existing `app/api/health.py`.
+   - Criteria: every Interface behaviour has its own criterion, and the failing side is covered too.
+     - Criterion 1 covers `--version` (stdout text, empty stderr, return 0).
+     - Criterion 2 covers `[]`, `--help`, `x` and `--version x` as rows of one parametrized test (return 2, empty stdout, usage line on stderr).
+     - Criterion 3 covers the `argv` default from `sys.argv` in both branches.
+     - Criterion 4 covers the "knows nothing of the layers" claim, and names only the forbidden imports.
+     - Criterion 5 covers the same cases as a child process with `sys.executable`.
+     - Each criterion is testable by one test function, or one parametrized test, without further decisions.
+   - Smoke test: both commands are runnable (`uv run python -m app --version` and `uv run python -m app`, each with `echo "exit $?"`). Each `Expect:` line is checkable: exact lines, stream named, exit code given. The `0.1.0` matches `pyproject.toml`.
+   - Architecture: `app.__main__` is a module outside the layers and is tested at the `tests/` root, as `CLAUDE.md` says. It needs nothing from `app.domain`, `app.service`, `app.repository` or `app.api`, and the story says so. It is wired by hand without a new dependency (`argparse` is not required), and it adds no new top-level package. The existing `tests/imports.py` helper is available for criterion 4. The docs criterion targets the README's *Getting started* section, which exists.
+   - Scope: this is the feature's Scope item `python -m app --version` and is not in its Out of scope. It matches the feature's decisions 2, 5 and 8 (usage error for any other argument, exact `--version` only, child-process test).
+   No questions. No story edits.
