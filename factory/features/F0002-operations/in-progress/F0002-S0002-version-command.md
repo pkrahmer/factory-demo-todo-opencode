@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T13:45:12.810011Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -90,6 +94,11 @@ journal:
   at: '2026-10-19T13:44:51.989267Z'
   stage: tests
   run: c38a0d3ec2fb413aa445fd1fe050cf42
+- number: 16
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:45:12.810011Z'
+  stage: doing
 ---
 
 # Version command
@@ -238,3 +247,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
 
     `lint`: lint: green (0.0 s)
     `test`: test: green (7.2 s)
+16. factory: started doing as opencode-demo.
