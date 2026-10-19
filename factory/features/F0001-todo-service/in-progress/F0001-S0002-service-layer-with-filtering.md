@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: smoke-test
+  started_at: '2026-10-19T12:57:46.108993Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -69,6 +73,11 @@ journal:
   at: '2026-10-19T12:57:26.042873Z'
   stage: docs
   run: 5153312f718b402dbead327a41fd3465
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:57:46.108993Z'
+  stage: smoke-test
 ---
 
 # Service layer with filtering
@@ -272,3 +281,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
     - The method name `list` hides the built-in inside the class body. The coder and the reviewer both noted it. It is harmless today and is not a documentation matter.
 
     `check`: check: green
+12. factory: started smoke-test as opencode-demo.
