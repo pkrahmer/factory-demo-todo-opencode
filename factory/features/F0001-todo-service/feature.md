@@ -49,3 +49,4 @@ Product decisions taken while writing the stories or answering the pipeline's qu
 15. No repository inherits the `TodoRepository` protocol; one parametrized test in `tests/repository/test_contract.py` holds it, a row for each repository class, and a later repository adds its row there. (S0001 and S0004, story text; the shakedown's decision 16)
 16. `SqliteTodoRepository.from_path` takes a `str` or a `Path`, both tested. (S0004, story text; the shakedown's intake question on demo #5)
 17. `list(done=None)` is no filter, as `list()` is. (S0002, story text)
+18. `POST /todos` strips the title first and then applies the domain's length and blank rules; the request schema puts no rule of its own on `title`: `"  Buy milk "` is created as `Buy milk`, and 200 characters with surrounding spaces are accepted. (S0003, the human's answer on demo #3)
