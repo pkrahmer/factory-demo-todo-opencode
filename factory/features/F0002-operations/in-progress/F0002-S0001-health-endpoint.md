@@ -1,3 +1,30 @@
+---
+stage: intake
+blocked: null
+round: 0
+attempts: 0
+crashes: 0
+pull_request: null
+comments_read: []
+handed_over: null
+claim:
+  instance: opencode-demo
+  stage: intake
+  started_at: '2026-10-19T13:30:29.871178Z'
+  lease_duration: 60
+journal:
+- number: 1
+  speaker: human
+  kind: created
+  at: '2026-10-19T13:30:29.864059Z'
+  stage: intake
+- number: 2
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:30:29.871178Z'
+  stage: intake
+---
+
 # Health endpoint
 
 ## Description
@@ -68,3 +95,6 @@ print(TestClient(build_app({})).get('/health').json())
 Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
 
 ## Journal
+
+1. 2026-10-19 human: created.
+2. factory: started intake as opencode-demo.
