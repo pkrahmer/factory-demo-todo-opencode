@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: smoke-test
+  started_at: '2026-10-19T13:35:47.343301Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -69,6 +73,11 @@ journal:
   at: '2026-10-19T13:35:27.205310Z'
   stage: docs
   run: 5905ceb6232b4700adbc593d0e3532f0
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:35:47.343301Z'
+  stage: smoke-test
 ---
 
 # Health endpoint
@@ -232,3 +241,4 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
     Stale text I noticed but did not touch: none.
 
     `check`: check: green
+12. factory: started smoke-test as opencode-demo.
