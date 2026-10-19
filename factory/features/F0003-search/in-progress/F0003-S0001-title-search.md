@@ -1,17 +1,13 @@
 ---
-stage: review
+stage: doing
 blocked: null
-round: 0
+round: 1
 attempts: 0
 crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T14:07:30.096430Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -56,6 +52,12 @@ journal:
   kind: started
   at: '2026-10-19T14:07:30.096430Z'
   stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T14:07:58.564636Z'
+  stage: review
+  run: 7a8c8dc080df427181380303a7693a1d
 ---
 
 # Title search
@@ -178,3 +180,18 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/
 8. factory: started review as opencode-demo.
+9. reviewer: Reviewed `git diff main...HEAD -- . ':!factory'` (I skipped `docs/openapi.json`) against the work item.
+
+   The source changes are fine. `TodoService.list` strips `search`, applies `casefold` to both sides and filters after `done`, keeping the repository's order. `list_todos` declares `Query(max_length=MAX_TITLE_LENGTH)` and passes `search` on. The layers hold, and the service docstring is current.
+
+   Every criterion from 1 to 9 has a test that checks what the criterion says. The length limit is tested on both sides, including the padded case, as rows of one parametrized test. The coder's journal entry reports `make check` green.
+
+   Main point: this is round 0, so copies of existing test helpers count as findings, and the new test files copy three fixtures.
+
+   Findings:
+   1. tests/api/test_search.py:13-20: the `service` and `client` fixtures are copies of tests/api/test_todos.py:24-31, and `service` is also in tests/api/test_stats.py:15-17. Fix: under the standing leave, move `service` (built with `TickingClock`) and `client` into tests/conftest.py and use them from there in the earlier modules and the new one.
+   2. tests/service/test_search.py:11-13: the `service` fixture copies `ticking_service` in tests/service/test_todo_service.py:23-25. Fix: reuse the shared fixture from finding 1 instead of a second copy.
+   3. tests/service/test_search.py:21-25 and tests/api/test_search.py:28-32: the same `milk_done_and_open` fixture is written twice. Fix: define it once in tests/conftest.py. Do the same for the three-title setup (`three_todos` and `three_ids`) if one shared fixture can return the created todos.
+
+   Earlier tests:
+   - tests/api/test_todos.py: changed under the standing leave to move a shared test helper. Only `_assert_only_detail` was moved, to tests/responses.py as `assert_only_detail`. Every test keeps its name and checks the same thing.
