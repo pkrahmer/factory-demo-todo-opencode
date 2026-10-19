@@ -1,3 +1,30 @@
+---
+stage: intake
+blocked: null
+round: 0
+attempts: 0
+crashes: 0
+pull_request: null
+comments_read: []
+handed_over: null
+claim:
+  instance: opencode-demo
+  stage: intake
+  started_at: '2026-10-19T13:12:27.349326Z'
+  lease_duration: 60
+journal:
+- number: 1
+  speaker: human
+  kind: created
+  at: '2026-10-19T13:12:27.345955Z'
+  stage: intake
+- number: 2
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:12:27.349326Z'
+  stage: intake
+---
+
 # SQLite repository and persistence switch
 
 ## Description
@@ -66,3 +93,6 @@ test -f "$d/todo.db" && echo "database file exists"
 Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`; then a list holding exactly that todo, with the same id, after the restart; then `database file exists`.
 
 ## Journal
+
+1. 2026-10-19 human: created.
+2. factory: started intake as opencode-demo.
