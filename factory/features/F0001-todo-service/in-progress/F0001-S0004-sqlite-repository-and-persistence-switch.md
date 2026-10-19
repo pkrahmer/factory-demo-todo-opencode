@@ -1,17 +1,13 @@
 ---
-stage: review
+stage: doing
 blocked: null
-round: 0
+round: 1
 attempts: 0
 crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T13:16:47.598910Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -56,6 +52,12 @@ journal:
   kind: started
   at: '2026-10-19T13:16:47.598910Z'
   stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T13:17:24.268290Z'
+  stage: review
+  run: 5293fbd7c0ef4fb591fce01bf699ded4
 ---
 
 # SQLite repository and persistence switch
@@ -209,3 +211,11 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
 8. factory: started review as opencode-demo.
+9. reviewer: Findings:
+   1. `src/app/repository/sqlite.py`, `_todo_from_row(row: Row[Any])` and `from typing import Any`: this breaks the rule in `CLAUDE.md` *Architecture*, "`Any` only at a boundary that Pydantic validates immediately". The row comes from SQLAlchemy, and the `Todo` dataclass is built from it, not a Pydantic model, so the column values go untyped into the domain. Fix: type the row as `Row[tuple[str, str, bool, str]]`, unpack its typed values (`id_, title, done, created_at = row.tuple()`) to build the `Todo`, and drop the `Any` import.
+
+   I stopped at the Architecture group. The acceptance criteria group passed: criteria 1–13 each have a test that checks what the criterion says, the failing sides of the Interface rules are covered, and the coder's entry 7 reports `make check` green.
+
+   Earlier tests changed:
+   - tests/repository/test_contract.py: the human's leave in the story's Interface (the `_sqlite` factory, the `SqliteTodoRepository` row in `REPOSITORY_CLASSES`) and the standing leave in `CLAUDE.md` to move a shared helper (`make_todo` and the copied `T0` now come from `tests/fakes.py`). Every test keeps its name and what it checks.
+   - tests/fakes.py: the standing leave to move a shared helper (gains `make_todo`, moved from test_contract.py). Nothing already in the file changed.
