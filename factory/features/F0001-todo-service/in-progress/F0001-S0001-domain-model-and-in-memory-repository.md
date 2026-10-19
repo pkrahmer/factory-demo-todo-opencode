@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: docs
+  started_at: '2026-10-19T12:49:17.423979Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -58,6 +62,11 @@ journal:
   at: '2026-10-19T12:48:57.111199Z'
   stage: review
   run: fffa5188a4954314b89561db80c95f59
+- number: 10
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:49:17.423979Z'
+  stage: docs
 ---
 
 # Domain model and in-memory repository
@@ -307,3 +316,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
    - **Work item:** journal 7 explains the main decision and the rejected alternative, which was a validating factory beside a plain constructor. The Description matches what was built. Criterion 25 still tells the documenter what to write.
 
    Earlier tests: `git diff --name-status main...HEAD` shows every test file as added (`A`), so no test file that `main` already holds was changed.
+10. factory: started docs as opencode-demo.
