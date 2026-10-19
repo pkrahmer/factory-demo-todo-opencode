@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: smoke-test
-  started_at: '2026-10-19T13:47:51.980718Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -132,6 +128,12 @@ journal:
   kind: started
   at: '2026-10-19T13:47:51.980718Z'
   stage: smoke-test
+- number: 23
+  speaker: smoke-tester
+  kind: result
+  at: '2026-10-19T13:48:16.629004Z'
+  stage: smoke-test
+  run: 75661846e54c43419d584989ff71f0f6
 ---
 
 # Version command
@@ -343,3 +345,33 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
 
     `check`: check: green
 22. factory: started smoke-test as opencode-demo.
+23. smoke-tester: I ran both commands under `## Smoke test` from the repository root, in order and exactly as written. Both met their `Expect:` lines. There are no findings.
+
+    Command 1:
+    ```bash
+    uv run python -m app --version; echo "exit $?"
+    ```
+    ```
+    app 0.1.0
+    exit 0
+    ```
+    Met: two lines, `app 0.1.0`, then `exit 0`.
+
+    Command 2:
+    ```bash
+    uv run python -m app; echo "exit $?"
+    ```
+    ```
+    usage: python -m app --version
+    exit 2
+    ```
+    Met: two lines, the usage line, then `exit 2`.
+
+    I checked one more thing beyond what was written: which stream each line goes to. With `uv run python -m app 2>/dev/null | od -c`, stdout was empty, so the usage line is on stderr as the Expect line says. With `uv run python -m app --version 2>&1 >/dev/null | od -c`, stderr was empty.
+
+    I read the acceptance criteria again against the run:
+    - **Criteria 1, 2 (no-argument case), 3 and 5:** what the module printed and returned matches them: `app <version>` with a newline on stdout and exit 0; the usage line on stderr, an empty stdout and exit 2.
+    - **Criterion 7:** `README.md` *Getting started* shows `uv run python -m app --version    # prints: app 0.1.0`, and says that any other argument, or none, prints the usage line to stderr and exits 2.
+    - **Criteria 4 and 6:** the smoke test does not exercise them. Nothing I saw contradicts them.
+
+    I fixed nothing and changed no files. Nothing is open.
