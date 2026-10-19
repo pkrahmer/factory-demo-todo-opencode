@@ -1,0 +1,29 @@
+contract: "1.0"
+attempts_cap: 2
+crash_cap: 2
+acceptance_stage: acceptance
+project_commands:
+  check: {time_limit: 10}
+  lint: {time_limit: 5}
+  test: {time_limit: 10}
+  duplicates: {time_limit: 5}
+# What every agent run may write for the project's tools, besides its write paths.
+tool_paths: [".venv/*", ".mypy_cache/*", ".ruff_cache/*", ".pytest_cache/*", ".import_linter_cache/*", ".reports/*", "mutants/*", "~/.cache/*", "~/.semgrep/*"]
+roles:
+  intake: {write_paths: ["{work_item}"]}
+  tester: {write_paths: ["tests/*"]}
+  coder: {write_paths: ["src/*", "docs/openapi.json"]}
+  reviewer: {write_paths: ["{work_item}"]}
+  documenter: {write_paths: ["README.md", "docs/*"]}
+  smoke-tester: {write_paths: ["{work_item}"]}
+  acceptance-reviewer: {write_paths: ["{work_item}", "{feature}/backlog/*"]}
+stages:
+  intake: {role: intake, next: [tests]}
+  tests: {role: tester, next: [doing], checks: [lint], reports: [test]}
+  doing: {role: coder, next: [review, tests], checks: [check], reports: [duplicates]}
+  review: {role: reviewer, next: [docs, doing], round_cap: 3}
+  docs: {role: documenter, next: [smoke-test, doing], checks: [check], round_cap: 3}
+  smoke-test: {role: smoke-tester, next: [approval, doing], round_cap: 3}
+  acceptance: {role: acceptance-reviewer, next: [approval]}
+  approval: {approval: true, next: [done, doing]}
+  done: {}

@@ -1,0 +1,30 @@
+rules:
+  - id: project-no-eval-exec
+    languages: [python]
+    severity: ERROR
+    message: eval() and exec() run arbitrary code; parse the input into a schema instead.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+
+  - id: project-no-subprocess-shell
+    languages: [python]
+    severity: ERROR
+    message: A shell command line invites injection; pass an argument list and leave shell=False.
+    pattern: subprocess.$FUNC(..., shell=True, ...)
+
+  - id: project-no-pickle-loads
+    languages: [python]
+    severity: ERROR
+    message: Unpickling runs arbitrary code; read data through a validated format (Pydantic, JSON).
+    pattern-either:
+      - pattern: pickle.loads(...)
+      - pattern: pickle.load(...)
+
+  - id: project-no-sql-text
+    languages: [python]
+    severity: ERROR
+    message: SQL in a string invites injection; build the statement from SQLAlchemy Core constructs.
+    pattern-either:
+      - pattern: sqlalchemy.text(...)
+      - pattern: $CONNECTION.exec_driver_sql(...)

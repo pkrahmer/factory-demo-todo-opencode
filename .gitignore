@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.import_linter_cache/
+.coverage
+htmlcov/
+*.db
+.claude/settings.local.json
+.licenses-requirements.txt
+.reports/
+.env
+mutants/

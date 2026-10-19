@@ -1,0 +1,119 @@
+[project]
+name = "app"            # the repository carries the project name; the package stays generic
+version = "0.1.0"
+description = "Single-user to-do service, built by the factory"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi==0.141.1",
+    "pydantic==2.14.1",
+    "sqlalchemy==2.1.5",
+    "uvicorn[standard]==0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff==0.17.0",
+    "mypy==2.4.0",
+    "import-linter==2.15",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "pytest-xdist==3.8.0",
+    "httpx==0.28.1",
+    "semgrep==1.180.0",
+    "bandit==1.9.4",
+    "detect-secrets==1.5.0",
+    "pip-licenses==5.5.5",
+    "pylint==4.1.3",
+    "vulture==2.16",
+    "mutmut==3.8.0",
+]
+
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/app"]
+
+# --- Lint and format ---------------------------------------------------------
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = ["*.md"]   # stories carry illustrative code blocks, not code
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "RET", "ARG", "PL", "C90", "S", "D"]
+# Magic values are fine in small code; domain errors keep noun names; empty packages,
+# magic methods and __init__ need no docstring.
+ignore = ["PLR2004", "N818", "D104", "D105", "D107"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S603", "S607", "PLR0913", "D"]  # asserts and fixtures are the point of tests
+# Docstrings are required where the interface is: domain and service. The edges (api,
+# repository, __main__) keep the module docstring and are free otherwise.
+"src/app/api/**" = ["D1"]
+"src/app/repository/**" = ["D1"]
+"src/app/__main__.py" = ["D1"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8
+
+[tool.ruff.lint.pylint]
+max-args = 5
+
+# --- Types -------------------------------------------------------------------
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = ["src", "tests"]
+plugins = ["pydantic.mypy"]
+
+# --- Layers ------------------------------------------------------------------
+# Layers in parentheses are optional: the contract holds for the layers that exist, so it
+# is in force from the first story on and every later layer falls under it when it arrives.
+# Service and repository are independent siblings: neither may import the other.
+[tool.importlinter]
+root_package = "app"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Layers"
+type = "layers"
+layers = ["(app.api)", "(app.service) | (app.repository)", "(app.domain)"]
+
+# --- Tests -------------------------------------------------------------------
+# No `-q` here: `make test` passes it, and a second one would hide the summary line.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+# Only the folders of failed tests stay in the temporary directory.
+tmp_path_retention_policy = "failed"
+
+[tool.coverage.run]
+source = ["src/app"]
+branch = true
+data_file = ".reports/.coverage"
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+# The bodies of a protocol's methods are `...`, never run.
+exclude_also = ["^\\s*\\.\\.\\.$"]
+
+# --- Mutation testing (make mutants, outside make check) ---------------------
+# The tests that read the source (the import rules of the layers) name only what a module must
+# not import, so they hold on mutmut's rewritten copy and need no `--deselect` here.
+[tool.mutmut]
+source_paths = ["src/app/"]
+pytest_add_cli_args_test_selection = ["tests/"]
+pytest_add_cli_args = ["-p", "no:cov"]
+# A test reads docs/openapi.json beside the mutated copy.
+also_copy = ["docs/"]
