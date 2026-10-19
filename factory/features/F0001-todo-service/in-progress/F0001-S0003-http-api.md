@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: smoke-test
+  started_at: '2026-10-19T13:10:27.645861Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -86,6 +90,11 @@ journal:
   at: '2026-10-19T13:10:07.116116Z'
   stage: docs
   run: b5f1168aeca94f358d8be1378edb5678
+- number: 15
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:10:27.645861Z'
+  stage: smoke-test
 ---
 
 # HTTP API
@@ -412,3 +421,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     - The detail text after the location prefix (for example `Input should be a valid UUID, ...`) is Pydantic's wording. `docs/api.md` says only the prefix (`body`, `query`, `path`) is stable.
 
     `check`: check: green
+15. factory: started smoke-test as opencode-demo.
