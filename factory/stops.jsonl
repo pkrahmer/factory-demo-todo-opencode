@@ -1,1 +1,2 @@
 {"event":"raised","scope":"machine","reason":"preflight_failed","at":"2026-10-19T12:33:44.453322Z","instance":"opencode-demo"}
+{"event":"cleared","scope":"machine","reason":"preflight_failed","at":"2026-10-19T12:38:31.262868Z","instance":"opencode-demo"}
