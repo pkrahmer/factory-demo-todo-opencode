@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: docs
+  started_at: '2026-10-19T13:34:37.960960Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -58,6 +62,11 @@ journal:
   at: '2026-10-19T13:34:17.395260Z'
   stage: review
   run: 799b970a22b4498c981dd75653f14cc3
+- number: 10
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:34:37.960960Z'
+  stage: docs
 ---
 
 # Health endpoint
@@ -202,3 +211,4 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
    - **Work item hygiene:** Entry 7 gives the main decision and what was rejected. The Description matches what was built, and the docs criterion still says what a reader needs to know.
 
    Earlier tests: none. The diff only adds `tests/api/test_health.py` and changes no test file that `main` already holds.
+10. factory: started docs as opencode-demo.
