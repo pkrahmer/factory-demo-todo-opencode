@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: smoke-test
-  started_at: '2026-10-19T13:35:47.343301Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -78,6 +74,12 @@ journal:
   kind: started
   at: '2026-10-19T13:35:47.343301Z'
   stage: smoke-test
+- number: 13
+  speaker: smoke-tester
+  kind: result
+  at: '2026-10-19T13:36:12.538685Z'
+  stage: smoke-test
+  run: 8944aea089a147bca2ba6fdd196048d9
 ---
 
 # Health endpoint
@@ -242,3 +244,24 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
 
     `check`: check: green
 12. factory: started smoke-test as opencode-demo.
+13. smoke-tester: I ran the one command under `## Smoke test` from the repository root, exactly as written, and fixed nothing.
+
+    Command 1: `uv run python -c "...print(TestClient(build_app({})).get('/health').json())"`
+
+    ```
+    /work/checkout/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+      from starlette.testclient import TestClient as TestClient  # noqa
+    {'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}
+    ```
+
+    Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`. **Met.**
+    - The printed line is exactly the expected one.
+    - The first two lines are a warning that an installed package (starlette's test client) prints on stderr. They do not come from this story's code. I ran the command again with stderr thrown away (`2>/dev/null | wc -l`), and stdout is exactly 1 line.
+    - I judged the "one line" on stdout, so the warning is not a finding. If the human wants "one line" to cover stderr too, the warning comes from the pinned dependencies, not from this story.
+
+    Against the acceptance criteria, the output contradicts none of them:
+    - `status` is `ok` and `version` is `0.1.0`, the version in `pyproject.toml` (criterion 1).
+    - `build_app({})` reports `storage: memory` (criteria 1 and 3).
+    - The smoke test does not exercise the other criteria (2 and 4 to 9).
+
+    Findings: none.
