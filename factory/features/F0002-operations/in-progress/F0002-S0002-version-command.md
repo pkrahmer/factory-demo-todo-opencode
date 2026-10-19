@@ -1,17 +1,13 @@
 ---
-stage: review
+stage: doing
 blocked: null
-round: 0
+round: 1
 attempts: 0
 crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T13:42:39.098641Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -66,6 +62,12 @@ journal:
   kind: started
   at: '2026-10-19T13:42:39.098641Z'
   stage: review
+- number: 11
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T13:43:10.669238Z'
+  stage: review
+  run: 101e240662f649aabed2fb63f0c8f363
 ---
 
 # Version command
@@ -169,3 +171,14 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 7 dead code, in .reports/
 10. factory: started review as opencode-demo.
+11. reviewer: Findings:
+    1. tests/test_main.py:57 (`test_entry_point_imports_no_layer`): the inline check `module == layer or module.startswith(f"{layer}.")` is a third copy of a check that already exists as `_is_repository` in tests/api/test_imports.py and inside `_is_forbidden` in tests/domain/test_imports.py. Fix: the tester adds one shared function, e.g. `belongs_to(module: str, package: str) -> bool`, to tests/imports.py and uses it in test_main.py. Under the standing leave to move a shared test helper, the tester may also make `_is_repository` and `_is_forbidden` use it, as long as each earlier test keeps its name and checks the same thing.
+
+    What I checked:
+    - Criteria 1 to 5: each test checks its criterion exactly: the streams, the exact text with its newline, the return or exit code. Criterion 2's four usage-error cases are rows of one parametrized test. Criterion 3 covers both of its cases. Criterion 5 runs the module as a child process with `sys.executable` and covers both its cases. The coder's journal entry 9 reports `make check` green.
+    - Architecture: src/app/__main__.py imports only `sys` and `importlib.metadata`, nothing from the layers, and adds no new package or dependency.
+    - Security: no secrets, no strings built into shell commands, no markers that silence a check.
+    - Code quality in src/: the names say what things are, there is no dead code, and the module docstring is present, which is all `CLAUDE.md` asks of `__main__`.
+    - Work item: the Description matches what was built. The journal explains why the coder rejected `argparse`. The docs criterion still says what the README must show.
+
+    Earlier tests: none. The diff changes, renames or deletes no test file that `main` already holds; it only adds tests/test_main.py.
