@@ -1,17 +1,13 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: intake
-  started_at: '2026-10-19T12:52:45.678194Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,12 @@ journal:
   kind: started
   at: '2026-10-19T12:52:45.678194Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-10-19T12:53:13.179226Z'
+  stage: intake
+  run: 4b6869a3d8274f9f87875fe8b28582e2
 ---
 
 # Service layer with filtering
@@ -117,3 +119,24 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
 1. 2026-10-19 human: created.
 2. factory: started intake as opencode-demo.
+3. intake: accepted
+
+   - Interface: it names `src/app/service/todo_service.py` with `Clock`, `utc_now` and `TodoService`, and a signature for each method.
+     - The signatures fit the code that exists. `TodoRepository` has `add`, `get`, `list_all`, `update` and `delete`. `Todo` has `new(title, now=...)`, `with_title` and `with_done`. The domain has `InvalidTitle` and `TodoNotFound(todo_id)`. `InMemoryTodoRepository` is in `app.repository.memory`.
+     - `app/service` does not exist yet, so the coder creates the package.
+   - Criteria: each is testable by one test function, or by one parametrized test where the story says so (5 and 13).
+     - Every Interface behaviour has a criterion:
+       - the clock stamps `created_at` (1);
+       - `done=None` means no filter (5, with `list()` in 4);
+       - lists are in creation order (4, 5);
+       - errors propagate unchanged (2, 3, 7, 13);
+       - the default clock is `utc_now` (15);
+       - `utc_now` is timezone-aware, at zero offset and within a second of now (14).
+     - Every rule has its failing side. A blank title is refused on `create` (2) and on `rename` (7), and nothing is stored or changed. An unknown id is refused on `get` (3) and on the other four methods (13). A completed todo can be completed again and an open one reopened without an error (9, 11), which is feature decision 5.
+     - The 200-character title limit belongs to the domain, and the story keeps it there ("the title rule stays in the domain"), so it needs no criterion in this story.
+     - One small ambiguity in criterion 5: it does not say which todos are completed ("created alternately"). It does not change what the test checks, so I did not ask.
+   - Smoke test: both blocks are runnable with `uv run python -c`, and they use only `InMemoryTodoRepository` and `TodoService`.
+     - Block 1: the fixed clock gives every todo the same time, but each filtered list holds one todo, so tie-breaking by id does not matter. The expected lines `['Buy milk']`, `['Write the next story']` and `Write story S0003 2026-10-04T12:00:00+00:00` follow from the Interface.
+     - Block 2: it prints `InvalidTitle`, `TodoNotFound` and `[]`, which can be checked line by line.
+   - Architecture: the service depends on the `TodoRepository` protocol and the domain only, with no import of `app.repository` or `app.api`. The clock lives in the service, as the Description says. Tests go in `tests/service/` and use the in-memory repository, as `CLAUDE.md` asks. There are no new dependencies and no change to `factory/`.
+   - Scope: this is the "service layer: create, get, list with a done filter, rename, complete, reopen, delete" item of `feature.md`, with no API and no storage change. Nothing is in "Out of scope". Feature decisions 5 and 17 are carried by criteria 9, 11 and 5.
