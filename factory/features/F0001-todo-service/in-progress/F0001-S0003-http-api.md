@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T13:03:39.084724Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -51,6 +47,12 @@ journal:
   kind: started
   at: '2026-10-19T13:03:39.084724Z'
   stage: tests
+- number: 8
+  speaker: tester
+  kind: result
+  at: '2026-10-19T13:05:53.538531Z'
+  stage: tests
+  run: 3599e41db6d449e090c4ab04c5d67d78
 ---
 
 # HTTP API
@@ -241,3 +243,43 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    - Architecture: it matches `CLAUDE.md`. Only `app.api.main` wires the repository, and criterion 23 tests that. Errors map in one place. Boundaries are Pydantic models, and `get_service` lives in `dependencies.py`.
    - Scope: inside the feature's scope (HTTP API, one error shape, committed OpenAPI schema). It touches nothing in the "Out of scope" list, and it adds no operations endpoints.
 7. factory: started tests as opencode-demo.
+8. tester: I wrote tests for criteria 1–24 through FastAPI's `TestClient` against `create_app(TodoService(InMemoryTodoRepository(), clock=TickingClock()))`, built from fixtures. The ticking clock makes creation order deterministic. Criteria 25 (`make check` green) and 26 (docs) are not the tests stage's to test.
+
+   Criterion → test:
+   - criterion 1: tests/api/test_todos.py::test_create_returns_the_new_open_todo
+   - criterion 2: tests/api/test_todos.py::test_create_with_a_blank_title_is_rejected
+   - criterion 3: tests/api/test_todos.py::test_create_applies_the_title_length_limit (rows: 200 chars, 201 chars, 200 chars with surrounding spaces)
+   - criterion 4: tests/api/test_todos.py::test_create_without_a_title_names_the_missing_field
+   - criterion 5: tests/api/test_todos.py::test_list_returns_every_todo_in_creation_order
+   - criterion 6: tests/api/test_todos.py::test_list_filters_by_the_done_flag (rows: true, false)
+   - criterion 7: tests/api/test_todos.py::test_list_with_an_invalid_done_filter_is_rejected
+   - criterion 8: tests/api/test_todos.py::test_get_returns_the_todo
+   - criterion 9: tests/api/test_todos.py::test_an_id_that_is_no_uuid_is_rejected (rows: get, patch, delete)
+   - criterion 10: tests/api/test_todos.py::test_patch_done_completes_and_reopens_the_todo
+   - criterion 11: tests/api/test_todos.py::test_patch_title_renames_the_todo_and_keeps_the_rest
+   - criterion 12: tests/api/test_todos.py::test_patch_that_sets_nothing_is_rejected_and_changes_nothing (four rows)
+   - criterion 13: tests/api/test_todos.py::test_patch_with_a_blank_title_changes_nothing
+   - criterion 14: tests/api/test_todos.py::test_patch_title_and_done_applies_both
+   - criterion 15: tests/api/test_todos.py::test_delete_removes_the_todo
+   - criterion 16: tests/api/test_todos.py::test_an_unknown_id_is_not_found (rows: get, patch, delete)
+   - criterion 17: tests/api/test_todos.py::test_routes_use_the_service_given_to_create_app
+   - criterion 18: tests/api/test_todos.py::test_the_api_is_called_todo_service
+   - criterion 19: tests/api/test_todos.py::test_each_app_uses_its_own_service
+   - criterion 20: tests/api/test_todos.py::test_every_error_body_has_only_a_detail (one row each for the requests of criteria 2, 4, 7, 9 and 16)
+   - criterion 21: tests/api/test_openapi.py::test_committed_schema_matches_the_app
+   - criterion 22: tests/api/test_openapi.py::test_schema_names_the_todo_paths_with_the_todos_tag
+   - criterion 23: tests/api/test_imports.py::test_only_main_imports_the_repository_layer (names only the forbidden import, `app.repository`, for every `app.api` module except `main.py`)
+   - criterion 24: tests/api/test_todos.py::test_create_strips_the_title
+
+   Files created: tests/api/__init__.py, tests/api/test_todos.py, tests/api/test_openapi.py, tests/api/test_imports.py, tests/fakes.py, tests/imports.py.
+
+   Shared helpers moved under the standing leave in `CLAUDE.md` (tests keep their names and check the same things):
+   - tests/service/test_todo_service.py: `T0` and `TickingClock` moved to tests/fakes.py, so the API tests reuse them instead of copying them.
+   - tests/domain/test_imports.py: `_imported_modules` became `imported_modules` in tests/imports.py. It now works out the package from the path relative to `src/app` rather than the domain folder, so the API import test uses it too. The domain results are unchanged.
+
+   `make test` (one run): 1 failed, 78 passed, 2 errors. Modules the test runner could not import: `app.api.app` (tests/api/test_todos.py) and `app.api.main` (tests/api/test_openapi.py). test_imports fails because there are no modules under `src/app/api` yet. All earlier tests still pass after the moves. `make lint` is green.
+
+   Open: nothing.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 1 failed, 78 passed, 20 warnings, 2 errors in 2.65s
