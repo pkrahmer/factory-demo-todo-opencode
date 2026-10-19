@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T14:08:19.261669Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -58,6 +62,11 @@ journal:
   at: '2026-10-19T14:07:58.564636Z'
   stage: review
   run: 7a8c8dc080df427181380303a7693a1d
+- number: 10
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:08:19.261669Z'
+  stage: doing
 ---
 
 # Title search
@@ -195,3 +204,4 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
 
    Earlier tests:
    - tests/api/test_todos.py: changed under the standing leave to move a shared test helper. Only `_assert_only_detail` was moved, to tests/responses.py as `assert_only_detail`. Every test keeps its name and checks the same thing.
+10. factory: started doing as opencode-demo.
