@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: tests
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T14:08:19.261669Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -67,6 +63,12 @@ journal:
   kind: started
   at: '2026-10-19T14:08:19.261669Z'
   stage: doing
+- number: 11
+  speaker: coder
+  kind: result
+  at: '2026-10-19T14:08:38.516623Z'
+  stage: doing
+  run: d7d61a9b134b4e499d9997dfe4d9152f
 ---
 
 # Title search
@@ -205,3 +207,17 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
    Earlier tests:
    - tests/api/test_todos.py: changed under the standing leave to move a shared test helper. Only `_assert_only_detail` was moved, to tests/responses.py as `assert_only_detail`. Every test keeps its name and checks the same thing.
 10. factory: started doing as opencode-demo.
+11. coder: Round 1. All three review findings are about test fixtures copied between test files, so they are test changes. `CLAUDE.md` (*Tests*) gives the tester a standing leave to move them; the coder does not. I changed no code and no tests. The source the reviewer accepted is unchanged: `src/app/service/todo_service.py`, `src/app/api/routes.py`, `docs/openapi.json`.
+
+    Moves for the tester, under the standing leave:
+    1. Move the `service` fixture (built with `TickingClock`) and the `client` fixture into `tests/conftest.py`. They are copied in `tests/api/test_search.py`, `tests/api/test_todos.py` and `tests/api/test_stats.py`; change all three to use the shared ones. `tests/api/test_health.py` also has a `service` fixture: check whether it is the same and include it if so.
+    2. Replace the `service` fixture in `tests/service/test_search.py` with the shared fixture from move 1. That fixture is the same as `ticking_service` in `tests/service/test_todo_service.py`, so change that module to use the shared one too, keeping its test names.
+    3. Define `milk_done_and_open` once in `tests/conftest.py`; it is now in both `tests/service/test_search.py` and `tests/api/test_search.py`. If one shared fixture can return the created todos, do the same for the three-title setup (`three_todos` in the service test, `three_ids` in the API test).
+
+    Every earlier test must keep its name and check the same thing. The tester's entry names each earlier test file it changes.
+
+    Main decision: hand back with `tests` and leave the fixtures alone. Rejected alternative: moving them myself. The coder never edits tests, not even under the standing leave.
+
+    Description: unchanged. The journal changed no meaning of the task.
+
+    Noticed, not touched: as in round 0, pytest's `StarletteDeprecationWarning` from `fastapi.testclient`, which comes from the installed dependencies. Criterion 12 (docs) is the documenter's.
