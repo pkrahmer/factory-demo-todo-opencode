@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: docs
+  started_at: '2026-10-19T12:56:49.322533Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -58,6 +62,11 @@ journal:
   at: '2026-10-19T12:56:29.374578Z'
   stage: review
   run: 27ab09a632b94a1880a61417574b7a15
+- number: 10
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:56:49.322533Z'
+  stage: docs
 ---
 
 # Service layer with filtering
@@ -244,3 +253,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
    - **Work item hygiene:** entry 7 explains the main decision and the alternative it rejected: filtering in the service rather than adding a filtered list method to the protocol. The Description matches what was built, and criterion 17 still says what `docs/project-guide.md` must cover.
 
    Earlier tests: none. Every test file in the diff is new (status `A`), and no test file that `main` already holds was changed.
+10. factory: started docs as opencode-demo.
