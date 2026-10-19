@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T13:50:42.490706Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -25,6 +29,11 @@ journal:
   at: '2026-10-19T13:50:22.347228Z'
   stage: intake
   run: c50385aa2d164979a155c425f078191c
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:50:42.490706Z'
+  stage: tests
 ---
 
 # Todo statistics
@@ -118,3 +127,4 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
    - Smoke test: runnable. `build_app({})` selects the in-memory repository, and POST `/todos` and PATCH `/todos/{id}` with `done` exist. The Expect line is one exact output line and does not depend on which todo is completed.
    - Architecture: the stats logic stays in `app.service` and uses the repository protocol's `list_all` only. The API imports the service type (api → service, allowed), and domain and repository are untouched. The router uses `Service` from `dependencies.py` and is included in `create_app`, so wiring stays in `app.api.main`.
    - Scope: within `feature.md` (`GET /stats: open, done, total`; decisions 3 and 9) and outside its "Out of scope". No test of another story is changed.
+4. factory: started tests as opencode-demo.
