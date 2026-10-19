@@ -1,3 +1,131 @@
+---
+stage: approval
+blocked: null
+round: 1
+attempts: 0
+crashes: 0
+pull_request: 10
+comments_read: []
+handed_over: approval
+claim: null
+journal:
+- number: 1
+  speaker: human
+  kind: created
+  at: '2026-10-19T14:03:37.353581Z'
+  stage: intake
+- number: 2
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:03:37.359907Z'
+  stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-10-19T14:04:07.925247Z'
+  stage: intake
+  run: 1505e4f93cd746f4b3858b17035e3923
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:04:28.569051Z'
+  stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-10-19T14:05:44.213277Z'
+  stage: tests
+  run: 51fb2689995b43038cbd120295dd9b02
+- number: 6
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:06:05.480257Z'
+  stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-10-19T14:07:09.411828Z'
+  stage: doing
+  run: d1f4508ce98e4471a9971e1d03d539fe
+- number: 8
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:07:30.096430Z'
+  stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T14:07:58.564636Z'
+  stage: review
+  run: 7a8c8dc080df427181380303a7693a1d
+- number: 10
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:08:19.261669Z'
+  stage: doing
+- number: 11
+  speaker: coder
+  kind: result
+  at: '2026-10-19T14:08:38.516623Z'
+  stage: doing
+  run: d7d61a9b134b4e499d9997dfe4d9152f
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:08:59.009091Z'
+  stage: tests
+- number: 13
+  speaker: tester
+  kind: result
+  at: '2026-10-19T14:10:43.869601Z'
+  stage: tests
+  run: 62cb45d6c95c491e9a25fdc40dae2301
+- number: 14
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:11:04.255880Z'
+  stage: doing
+- number: 15
+  speaker: coder
+  kind: result
+  at: '2026-10-19T14:12:02.822902Z'
+  stage: doing
+  run: ebff2ce61606473dad96afbce147a0c0
+- number: 16
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:12:23.416419Z'
+  stage: review
+- number: 17
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T14:12:44.997280Z'
+  stage: review
+  run: 49e14edd906c461abf224a0320ee9b2b
+- number: 18
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:13:05.316489Z'
+  stage: docs
+- number: 19
+  speaker: documenter
+  kind: result
+  at: '2026-10-19T14:13:55.958007Z'
+  stage: docs
+  run: 7dc01b661299410eb620f282b8f57af5
+- number: 20
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:14:16.556700Z'
+  stage: smoke-test
+- number: 21
+  speaker: smoke-tester
+  kind: result
+  at: '2026-10-19T14:14:38.051939Z'
+  stage: smoke-test
+  run: aa6f381fabc44fa9991cf42812dd049e
+---
+
 # Title search
 
 ## Description
@@ -65,3 +193,209 @@ print(r.status_code, list(r.json()))
 Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
 
 ## Journal
+
+1. 2026-10-19 human: created.
+2. factory: started intake as opencode-demo.
+3. intake: accepted
+   - Interface: `TodoService.list(*, done, search)` in `src/app/service/todo_service.py` and `list_todos` in `src/app/api/routes.py` are concrete and fit the current code. `MAX_TITLE_LENGTH` exists in `app.domain.model` (200). Every rule is stated: strip, `casefold` substring, `None` or blank means no filter, combine with `done`, repository order, 200-character limit counted as sent.
+   - Criteria: each is testable by one test function without further decisions. Every Interface behaviour has a criterion (match and order 1 and 6, strip 2, None/empty/blank 3, casefold 4, combination with both `done` values 5 and 7, unfiltered listing 9). The limit has both sides (8): 200 gives 200 and `[]`, 201 gives 422, and the padded 197 spaces plus `milk` gives 422. The 422 body is checkable (`detail` only, starting with `query.search: `, matching the joined location in `app.api.errors`). Criteria 10 and 11 cover openapi and `make check`; no existing test is changed.
+   - Smoke test: runnable (`build_app({})` exists, in-memory storage); the `Expect:` line is concrete: `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
+   - Architecture: the service filters `list_all()` and touches no repository or domain code; the API only passes the parameter and the existing handler maps the validation error. This is consistent with the layers in `CLAUDE.md`.
+   - Scope: within F0003's scope (title search in the service and as a query parameter); no index, repository method, ranking or fuzzy matching. The feature's decisions 1 to 4 are all covered by criteria.
+4. factory: started tests as opencode-demo.
+5. tester: Wrote tests for criteria 1–9 against the Interface; criteria 10–12 are checked by the existing openapi test, `make check` and the docs stage, so they get no new test.
+
+   - criterion 1: tests/service/test_search.py::test_search_returns_the_todos_whose_title_contains_the_text_in_creation_order
+   - criterion 2: tests/service/test_search.py::test_search_text_is_stripped
+   - criterion 3: tests/service/test_search.py::test_no_or_blank_search_means_no_title_filter (rows none, empty, spaces)
+   - criterion 4: tests/service/test_search.py::test_search_uses_case_folding
+   - criterion 5: tests/service/test_search.py::test_search_combines_with_the_done_filter (rows open, done)
+   - criterion 6: tests/api/test_search.py::test_search_returns_the_matching_todos_in_creation_order
+   - criterion 7: tests/api/test_search.py::test_search_combines_with_the_done_filter
+   - criterion 8: tests/api/test_search.py::test_search_length_is_limited_on_the_text_as_sent (rows 200-chars, 201-chars, 201-chars-padded)
+   - criterion 9: tests/api/test_search.py::test_list_without_parameters_returns_every_todo
+   - criterion 10: existing tests/api/test_openapi.py::test_committed_schema_matches_the_app, unchanged
+
+   Files created: tests/service/test_search.py, tests/api/test_search.py, tests/responses.py.
+   Earlier test file changed: tests/api/test_todos.py. Under the standing leave in CLAUDE.md (*Tests*) I moved its private helper `_assert_only_detail` to tests/responses.py as `assert_only_detail`, because the new API test would otherwise have copied it. Every test in test_todos.py keeps its name and checks the same thing.
+
+   Setup in the API tests goes through the `TodoService` handed to `create_app`, as test_todos.py::test_routes_use_the_service_given_to_create_app does, so the `_create`/`_complete` HTTP helpers are not copied.
+
+   Modules not importable: none. Every module imports; the tests fail because `TodoService.list` does not take `search` yet (TypeError in the service tests) and because the route ignores `search` (wrong result or status in the API tests).
+
+   Still green before implementation: criterion 7's test, because on the data the criterion gives `Buy Milk` is the only done todo, so `done=true` alone already returns it; and criterion 9's test, which checks the existing unfiltered listing. `make lint` is green. I skipped the type check, as this stage says to.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 12 failed, 175 passed, 20 warnings in 4.30s
+6. factory: started doing as opencode-demo.
+7. coder: Implemented title search against the tester's tests. I changed no tests.
+
+   What I built:
+   - `src/app/service/todo_service.py`: `TodoService.list(*, done=None, search=None)` takes the repository's list and filters it in two steps. If `done` is given, it keeps only todos with that flag. It then strips `search` and applies `str.casefold`; if anything is left, it keeps only todos whose casefolded title contains that text. Creation order is unchanged. The docstring now covers both filters.
+   - `src/app/api/routes.py`: `list_todos` takes `search: Annotated[str | None, Query(max_length=MAX_TITLE_LENGTH)] = None`, with `MAX_TITLE_LENGTH` imported from `app.domain.model`, and passes it to the service. The schema checks the limit on the text as sent, so a search over 200 characters gets a 422. The existing handler in `app.api.errors` produces the `query.search: ...` detail.
+   - `docs/openapi.json`: regenerated with `make openapi`.
+
+   Main decision: the service narrows one list step by step, so `None`, an empty search and a blank search all go through the same "no title filter" path. The alternative I rejected was a single list comprehension with one condition for `done` and one for search. It saves a pass over the list, but it is harder to read, and the lists are small.
+
+   Refactor pass: I read the diff once more and found nothing to change.
+
+   Noticed, not touched: pytest prints a `StarletteDeprecationWarning` about `httpx` in `fastapi.testclient`. It comes from the installed dependencies and was there before this change. Criterion 12 (the docs) belongs to the documenter.
+
+   make check: check: green (187 passed).
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/
+8. factory: started review as opencode-demo.
+9. reviewer: Reviewed `git diff main...HEAD -- . ':!factory'` (I skipped `docs/openapi.json`) against the work item.
+
+   The source changes are fine. `TodoService.list` strips `search`, applies `casefold` to both sides and filters after `done`, keeping the repository's order. `list_todos` declares `Query(max_length=MAX_TITLE_LENGTH)` and passes `search` on. The layers hold, and the service docstring is current.
+
+   Every criterion from 1 to 9 has a test that checks what the criterion says. The length limit is tested on both sides, including the padded case, as rows of one parametrized test. The coder's journal entry reports `make check` green.
+
+   Main point: this is round 0, so copies of existing test helpers count as findings, and the new test files copy three fixtures.
+
+   Findings:
+   1. tests/api/test_search.py:13-20: the `service` and `client` fixtures are copies of tests/api/test_todos.py:24-31, and `service` is also in tests/api/test_stats.py:15-17. Fix: under the standing leave, move `service` (built with `TickingClock`) and `client` into tests/conftest.py and use them from there in the earlier modules and the new one.
+   2. tests/service/test_search.py:11-13: the `service` fixture copies `ticking_service` in tests/service/test_todo_service.py:23-25. Fix: reuse the shared fixture from finding 1 instead of a second copy.
+   3. tests/service/test_search.py:21-25 and tests/api/test_search.py:28-32: the same `milk_done_and_open` fixture is written twice. Fix: define it once in tests/conftest.py. Do the same for the three-title setup (`three_todos` and `three_ids`) if one shared fixture can return the created todos.
+
+   Earlier tests:
+   - tests/api/test_todos.py: changed under the standing leave to move a shared test helper. Only `_assert_only_detail` was moved, to tests/responses.py as `assert_only_detail`. Every test keeps its name and checks the same thing.
+10. factory: started doing as opencode-demo.
+11. coder: Round 1. All three review findings are about test fixtures copied between test files, so they are test changes. `CLAUDE.md` (*Tests*) gives the tester a standing leave to move them; the coder does not. I changed no code and no tests. The source the reviewer accepted is unchanged: `src/app/service/todo_service.py`, `src/app/api/routes.py`, `docs/openapi.json`.
+
+    Moves for the tester, under the standing leave:
+    1. Move the `service` fixture (built with `TickingClock`) and the `client` fixture into `tests/conftest.py`. They are copied in `tests/api/test_search.py`, `tests/api/test_todos.py` and `tests/api/test_stats.py`; change all three to use the shared ones. `tests/api/test_health.py` also has a `service` fixture: check whether it is the same and include it if so.
+    2. Replace the `service` fixture in `tests/service/test_search.py` with the shared fixture from move 1. That fixture is the same as `ticking_service` in `tests/service/test_todo_service.py`, so change that module to use the shared one too, keeping its test names.
+    3. Define `milk_done_and_open` once in `tests/conftest.py`; it is now in both `tests/service/test_search.py` and `tests/api/test_search.py`. If one shared fixture can return the created todos, do the same for the three-title setup (`three_todos` in the service test, `three_ids` in the API test).
+
+    Every earlier test must keep its name and check the same thing. The tester's entry names each earlier test file it changes.
+
+    Main decision: hand back with `tests` and leave the fixtures alone. Rejected alternative: moving them myself. The coder never edits tests, not even under the standing leave.
+
+    Description: unchanged. The journal changed no meaning of the task.
+
+    Noticed, not touched: as in round 0, pytest's `StarletteDeprecationWarning` from `fastapi.testclient`, which comes from the installed dependencies. Criterion 12 (docs) is the documenter's.
+12. factory: started tests as opencode-demo.
+13. tester: Round 1. The coder's entry 11 asked for three fixture moves, which close the reviewer's findings 1–3. I made all three under the standing leave in CLAUDE.md (*Tests*). I changed no source code, and every test keeps its name and checks the same thing.
+
+    What I moved into `tests/conftest.py`, each with a docstring:
+    - `ticking_service`: a `TodoService` over an empty `InMemoryTodoRepository` with a `TickingClock`.
+    - `client`: a `TestClient` of `create_app(ticking_service)`.
+    - `three_todos`: creates `Buy Milk`, `MILK run` and `Call mum` and returns the created todos.
+    - `milk_done_and_open`: creates `Buy Milk` (done) and `MILK run` (open).
+
+    Main decision: I named the shared service fixture `ticking_service`, not `service`. `tests/service/test_todo_service.py` keeps its own `service` fixture with a fixed clock (`T0`), which a shared `service` would have hidden. So the API tests now ask for `ticking_service` by that name.
+
+    Rejected alternatives:
+    - A shared fixture named `service`: it would have meant renaming the fixed-clock fixture in about 17 tests.
+    - A `three_ids` fixture next to `three_todos`: the API tests now take the ids from `three_todos`.
+
+    Earlier test files I changed, all under the standing leave:
+    - `tests/api/test_todos.py`: removed its copies of `service` and `client`. `test_routes_use_the_service_given_to_create_app` and `test_the_api_is_called_todo_service` now take `ticking_service`. Removed the imports that are no longer used.
+    - `tests/api/test_stats.py`: removed its copy of `service`. `test_get_stats_returns_the_counts` now takes `ticking_service`. Removed the imports that are no longer used.
+    - `tests/service/test_todo_service.py`: removed its copy of `ticking_service`, so its tests use the shared one. Its fixed-clock `service` stays, and so does the `T0` import; the `TickingClock` import is gone.
+
+    Not moved: the `service` fixture in `tests/api/test_health.py`. It uses the default clock, not a `TickingClock`, so it is not a copy of the shared fixture.
+
+    New test files, rewritten to use the shared fixtures:
+    - `tests/service/test_search.py`: no local fixtures left.
+    - `tests/api/test_search.py`: no local fixtures left. The id comparisons are now built from `three_todos`.
+
+    Criterion → test (unchanged from entry 5):
+    - criterion 1: tests/service/test_search.py::test_search_returns_the_todos_whose_title_contains_the_text_in_creation_order
+    - criterion 2: tests/service/test_search.py::test_search_text_is_stripped
+    - criterion 3: tests/service/test_search.py::test_no_or_blank_search_means_no_title_filter (rows none, empty, spaces)
+    - criterion 4: tests/service/test_search.py::test_search_uses_case_folding
+    - criterion 5: tests/service/test_search.py::test_search_combines_with_the_done_filter (rows open, done)
+    - criterion 6: tests/api/test_search.py::test_search_returns_the_matching_todos_in_creation_order
+    - criterion 7: tests/api/test_search.py::test_search_combines_with_the_done_filter
+    - criterion 8: tests/api/test_search.py::test_search_length_is_limited_on_the_text_as_sent (rows 200-chars, 201-chars, 201-chars-padded)
+    - criterion 9: tests/api/test_search.py::test_list_without_parameters_returns_every_todo
+    - criterion 10: existing tests/api/test_openapi.py::test_committed_schema_matches_the_app, unchanged
+
+    Files created this round: none; the files changed are listed above. Modules not importable: none.
+
+    `make lint` is green and `make test` passes 187 tests, the same count as in round 0. I skipped the type check, as this stage says to.
+
+    `lint`: lint: green (0.0 s)
+    `test`: test: green (5.7 s)
+14. factory: started doing as opencode-demo.
+15. coder: Round 1. In entry 13 the tester moved the fixtures behind review findings 1–3 into `tests/conftest.py`: `ticking_service`, `client`, `three_todos` and `milk_done_and_open`. That closes all three findings. I changed no code and no tests this round.
+
+    What I built: nothing new. The source from round 0 stands:
+    - `src/app/service/todo_service.py`: `TodoService.list(*, done=None, search=None)`.
+    - `src/app/api/routes.py`: `list_todos` with `search: Annotated[str | None, Query(max_length=MAX_TITLE_LENGTH)]`.
+    - `docs/openapi.json`: regenerated with `make openapi`.
+
+    Main decision: keep the round-0 source as it is, because none of the findings concerned it. The service narrows the repository's list step by step: first by `done`, then by the stripped, case-folded search text. I rejected again a single comprehension that combines both conditions, because it is harder to read.
+
+    Checks: I ran `make check` against the moved fixtures, which includes the `mypy --strict` run the tests stage skips. It ended `check: green`, with 187 tests passing.
+
+    Refactor pass: I read `git diff main -- src` again and found nothing to change.
+
+    Description: unchanged; the journal did not change the meaning of the task.
+
+    Noticed, not touched:
+    - pytest still warns `StarletteDeprecationWarning` from `fastapi.testclient`. It comes from the installed dependencies.
+    - `src/app/__main__.py` line 21 has no test coverage. That was already so before this story.
+    - Criterion 12 (the docs) is the documenter's.
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/
+16. factory: started review as opencode-demo.
+17. reviewer: Round 1. I reviewed `git diff main...HEAD -- . ':!factory'`, leaving out the generated `docs/openapi.json`, and checked it against the work item.
+
+    **Source.** `TodoService.list` filters the repository's list by `done` first, then by `search`. It strips the text and case-folds both it and the title, so `None` and blank text both mean no title filter. The order stays the repository's. `list_todos` declares `search` with `Query(max_length=MAX_TITLE_LENGTH)`, so the limit applies to the text as sent, and passes it to the service. The layers hold: the service touches only the repository protocol, and the API imports a constant from the domain. The service docstring describes both filters. There is no new marker that silences a check and no new secrets-baseline entry.
+
+    **Criteria.** Criteria 1–9 each have a test that checks what the criterion says:
+    - Criteria 3 and 5 are rows of one parametrized test each.
+    - Criterion 8 tests both sides of the limit in one parametrized test: 200 characters gives 200 and `[]`, 201 gives 422 with a `query.search: ` detail, and 197 spaces plus `milk` also gives 422.
+    - Criterion 10 is the existing openapi test, unchanged.
+    - In entry 15 the coder reports `make check` green, with 187 tests passing.
+
+    **Round 0 findings.** Findings 1–3 were copied fixtures. They are closed: `ticking_service`, `client`, `three_todos` and `milk_done_and_open` now each exist once, in `tests/conftest.py`. Neither new test file defines a local copy.
+
+    **Work item.** The journal explains the main decision (filtering step by step) and what was rejected (a single comprehension). The Description matches what was built, and criterion 12 still says what the documenter must write.
+
+    no findings
+
+    Earlier tests:
+    - tests/api/test_todos.py: changed under the standing leave to move a shared test helper. `_assert_only_detail` moved to `tests/responses.py`, and the `service` and `client` copies moved to the shared `ticking_service` and `client`. Every test keeps its name and checks the same thing.
+    - tests/api/test_stats.py: changed under the standing leave to move a shared test helper. Its `service` copy was replaced by the shared `ticking_service`, and the test keeps its name and check.
+    - tests/service/test_todo_service.py: changed under the standing leave to move a shared test helper. Its `ticking_service` copy was removed in favour of the shared one, and its fixed-clock `service` stays.
+    - tests/conftest.py: no leave needed. The change only adds fixtures and leaves `db_path` as it was.
+18. factory: started docs as opencode-demo.
+19. documenter: Round 1 docs. Criterion 12 asks for `search` in the `docs/api.md` endpoint table with its rules in a sentence, and one `search` call in the README. I wrote both, plus the matching changes to `docs/project-guide.md`. I ran the search calls through `TestClient` (stripped search, search with `done`, 201 characters giving 422 with `query.search: String should have at most 200 characters`). The `curl` examples were not run against a live server. I edited only documents, so I did not run `make check`; the factory's run decides.
+
+    Files changed:
+    - `docs/api.md`: The `GET /todos` row now names the `done` and `search` parameters. The "List filter" bullet became "List filters" and states the `search` rules: stripped, Unicode case-folded substring, missing, empty or blank means no filter, at most 200 characters counted as sent, combines with `done`, creation order. The errors table and its examples include a `search` over 200 characters (`query.search: ...`). A new example calls `?search=milk&done=false`.
+    - `README.md`: The intro mentions filtering by a piece of the title. The shell example gains one `search` call, and the "Where to look next" bullets mention the list filters.
+    - `docs/project-guide.md`: The service table shows `list(*, done=None, search=None)`. "The done filter" became "The filters": `done` first, then the stripped, `casefold`ed substring, `None`/empty/blank means no filter, repository order, and the filtering stays in the service because the protocol has no filtered list. The `routes` row records that the schema's `max_length` refuses a longer `search`. The `stats` sentence now says "Like the filters".
+
+    Cross-read against the diff and found current: the story's Interface and criteria against `src/app/service/todo_service.py` and `src/app/api/routes.py`; the rest of `docs/api.md` (storage, health, stats, title rules, PATCH rules, error shape); the rest of `docs/project-guide.md` (layers, domain model, repositories, Try it, Adding a repository); the rest of the README. `docs/openapi.json` is generated and was not touched.
+
+    Findings for the coder: none. The code matches the Interface and the criteria.
+
+    Stale text noticed, not touched: nothing related to this story. The `StarletteDeprecationWarning` from the installed dependencies, which the coder already noted, is not a documentation matter.
+
+    `check`: check: green
+20. factory: started smoke-test as opencode-demo.
+21. smoke-tester: Smoke test, round 1. I ran the command under `## Smoke test` once from the repository root, exactly as written. I changed nothing. I did not run `make check`, because the factory runs the checks after this stage.
+
+    Command 1, the `uv run python -c "..."` script (three todos, a padded search, then a 201-character search):
+
+    ```
+    /work/checkout/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+      from starlette.testclient import TestClient as TestClient  # noqa
+    ['Buy Milk', 'MILK run']
+    422 ['detail']
+    ```
+
+    Met its `Expect:` line. It printed two lines, `['Buy Milk', 'MILK run']` and then `422 ['detail']`. The first two lines of output are a warning on stderr from the installed `fastapi`/`starlette` packages. The coder noted it in entries 7, 11 and 15. It existed before this story and is not part of the expected output.
+
+    Criteria cross-read: the output is consistent with criteria 1 and 2 (a stripped, case-insensitive match in creation order) and criterion 8 (the 201-character side gives 422 with `detail` as the only key). It contradicts no criterion. The command does not test case folding, the `done` combination or the 200-character side; they are covered by the tests named in entry 13.
+
+    Findings: none.
+
+    Open: none.

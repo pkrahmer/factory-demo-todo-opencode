@@ -40,14 +40,14 @@ All bodies are JSON. A todo is returned as:
 | Method | Path | Body | Success | Errors |
 | --- | --- | --- | --- | --- |
 | POST | `/todos` | `{"title": "..."}` | 201, the new todo (open) | 422 |
-| GET | `/todos` | | 200, a list of todos in creation order | 422 |
+| GET | `/todos` | query `done`, `search` (both optional, see *List filters*) | 200, a list of todos in creation order | 422 |
 | GET | `/todos/{todo_id}` | | 200, the todo | 404, 422 |
 | PATCH | `/todos/{todo_id}` | `{"title": "..."}` and/or `{"done": true\|false}` | 200, the changed todo | 404, 422 |
 | DELETE | `/todos/{todo_id}` | | 204, empty body | 404, 422 |
 | GET | `/stats` | | 200, `{"open": n, "done": n, "total": n}` | |
 | GET | `/health` | | 200, `{"status": "ok", "version": "...", "storage": "..."}` (see *Health*) | |
 
-- **List filter.** `GET /todos?done=true` returns only the completed todos, `?done=false` only the open ones; without `done` all of them. Any other value is a 422.
+- **List filters.** `GET /todos?done=true` returns only the completed todos, `?done=false` only the open ones; without `done` all of them. Any other value is a 422. `?search=milk` returns the todos whose title contains the text: the text is stripped of surrounding whitespace, then matched as a case-insensitive substring (Unicode case folding, so `STRASSE` finds `Straße`). A `search` that is missing, empty or only whitespace means no title filter. At most 200 characters, counted on the text as sent (spaces around it count): a longer one is a 422, with `query.search: ` in front of the message. `done` and `search` combine: a todo must satisfy both. The order stays creation order.
 - **Ids.** A `todo_id` that is not a UUID is a 422, an unknown one a 404.
 
 ### Health
@@ -118,9 +118,9 @@ Every error has the same body, a JSON object with one key holding one sentence:
 | --- | --- | --- |
 | `TodoNotFound` | 404 | the error's message, `todo <id> not found` |
 | `InvalidTitle` | 422 | the error's message (see *Title rules*) |
-| Request validation (missing field, wrong type, bad `done` value, bad id, empty `PATCH`, body that is not JSON) | 422 | `<location>: <message>` of the first error, the location joined with dots |
+| Request validation (missing field, wrong type, bad `done` value, `search` over 200 characters, bad id, empty `PATCH`, body that is not JSON) | 422 | `<location>: <message>` of the first error, the location joined with dots |
 
-Examples of the last kind: `body.title: Field required`, `query.done: Input should be a valid boolean, unable to interpret input`, `path.todo_id: Input should be a valid UUID, invalid character: found `x` at 0`, `body: Value error, set title or done`. The location prefix (`body`, `query`, `path`) is stable; the message after it is Pydantic's and may change with its version.
+Examples of the last kind: `body.title: Field required`, `query.done: Input should be a valid boolean, unable to interpret input`, `query.search: String should have at most 200 characters`, `path.todo_id: Input should be a valid UUID, invalid character: found `x` at 0`, `body: Value error, set title or done`. The location prefix (`body`, `query`, `path`) is stable; the message after it is Pydantic's and may change with its version.
 
 ## Examples
 
@@ -142,6 +142,12 @@ curl -s 'localhost:8765/todos?done=false'
 
 ```json
 [{"id":"f9d48f8d-c7ed-43f3-be9c-c84dad617b58","title":"Buy milk","done":false,"created_at":"2026-10-19T13:09:19.344428Z"}]
+```
+
+Find todos by a piece of the title, here the open ones whose title contains `milk` in any case:
+
+```bash
+curl -s 'localhost:8765/todos?search=milk&done=false'
 ```
 
 Complete it, then delete it (use the `id` from the first call):

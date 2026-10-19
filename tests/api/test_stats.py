@@ -7,14 +7,8 @@ from fastapi.testclient import TestClient
 
 from app.api.app import create_app
 from app.api.main import app
-from app.repository.memory import InMemoryTodoRepository
 from app.service.todo_service import TodoService
-from tests.fakes import HTTP_METHODS, TickingClock
-
-
-@pytest.fixture
-def service() -> TodoService:
-    return TodoService(InMemoryTodoRepository(), clock=TickingClock())
+from tests.fakes import HTTP_METHODS
 
 
 def _nothing(service: TodoService) -> None:
@@ -35,11 +29,11 @@ def _two_open_one_done(service: TodoService) -> None:
     ],
 )
 def test_get_stats_returns_the_counts(
-    service: TodoService, seed: Callable[[TodoService], None], expected: dict[str, int]
+    ticking_service: TodoService, seed: Callable[[TodoService], None], expected: dict[str, int]
 ) -> None:
-    seed(service)
+    seed(ticking_service)
 
-    response = TestClient(create_app(service)).get("/stats")
+    response = TestClient(create_app(ticking_service)).get("/stats")
 
     assert response.status_code == 200
     assert response.json() == expected

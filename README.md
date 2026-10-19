@@ -1,6 +1,6 @@
 # To-do service
 
-A single-user to-do service with an HTTP API: create todos, list and filter them, rename, complete, reopen and delete them, kept in memory or in a SQLite file. It is being built story by story; this README grows with it.
+A single-user to-do service with an HTTP API: create todos, list them and filter by state or by a piece of the title, rename, complete, reopen and delete them, kept in memory or in a SQLite file. It is being built story by story; this README grows with it.
 
 ## Getting started
 
@@ -46,13 +46,14 @@ Open <http://localhost:8765/docs> for the interactive schema, or try it from a s
 ```bash
 curl -s -X POST localhost:8765/todos -H 'content-type: application/json' -d '{"title": "Buy milk"}'
 curl -s localhost:8765/todos
+curl -s 'localhost:8765/todos?search=milk'    # titles containing "milk", any case
 ```
 
 ## Where to look next
 
 - `CLAUDE.md`: the rules every change follows (architecture, tests, checks)
-- `docs/api.md`: every endpoint (todos, `/health` and `/stats`), the title and `PATCH` rules, the error body, where the todos are stored; the schema itself is `docs/openapi.json`
-- `docs/project-guide.md`: the layers and their reasons, the domain model (the `Todo` entity, its title rule, the errors, the repository protocol), the two repositories, the service (the use cases, the clock, the done filter, the counts) and the API modules
+- `docs/api.md`: every endpoint (todos, `/health` and `/stats`), the list filters (`done`, `search`), the title and `PATCH` rules, the error body, where the todos are stored; the schema itself is `docs/openapi.json`
+- `docs/project-guide.md`: the layers and their reasons, the domain model (the `Todo` entity, its title rule, the errors, the repository protocol), the two repositories, the service (the use cases, the clock, the done and title filters, the counts) and the API modules
 
 ## How it is built
 

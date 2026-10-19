@@ -93,7 +93,7 @@ Errors map as in memory: a duplicate id (`IntegrityError` on insert) becomes `Du
 | --- | --- |
 | `create(title)` | Builds a new open todo stamped with the clock, stores it and returns it; raises `InvalidTitle` before anything is stored |
 | `get(todo_id)` | Returns the todo; raises `TodoNotFound` |
-| `list(*, done=None)` | Returns the todos in the repository's order (creation order); `done=True` keeps the completed ones, `done=False` the open ones, `None` all |
+| `list(*, done=None, search=None)` | Returns the todos in the repository's order (creation order); `done=True` keeps the completed ones, `done=False` the open ones, `None` all; `search` keeps those whose title contains the text (see *The filters*) |
 | `rename(todo_id, title)` | Returns the todo with the new title (stripped); id, done flag and `created_at` stay; raises `InvalidTitle` or `TodoNotFound`, and the stored todo is unchanged |
 | `complete(todo_id)` | Returns the todo with `done` true; completing a completed todo is not an error |
 | `reopen(todo_id)` | Returns the todo with `done` false; reopening an open todo is not an error |
@@ -104,8 +104,8 @@ What the service owns:
 
 - **The use cases.** Each one reads, changes through `Todo.with_title` or `Todo.with_done`, and writes back with `update`. The rules stay in the domain: the service has no title check of its own, and `InvalidTitle` and `TodoNotFound` reach the caller unchanged.
 - **The clock.** `Clock` is `Callable[[], datetime]`. `utc_now()` returns `datetime.now(UTC)` and is the default. The service reads the clock only in `create`; tests pass a fixed or a ticking clock so that times and order are observable.
-- **The done filter.** The repository protocol has no filtered list. The service takes `list_all()` and keeps the todos whose `done` flag matches, so the order is the repository's. A filter on another field, or one that the database should apply, means extending the protocol.
-- **The counts.** `TodoStats` is a frozen, slotted dataclass with the fields `open` and `done`; `total` is a property (`open + done`), not a field, so the three numbers cannot disagree. `stats()` calls `list_all()` once and counts that one list: `done` is the number of todos with the flag set, `open` is the rest. Like the done filter, it counts in the service because the protocol has no count method; with many todos a count the database does itself would mean extending the protocol.
+- **The filters.** The repository protocol has no filtered list. The service takes `list_all()`, keeps the todos whose `done` flag matches when `done` is given, then keeps those whose title contains `search` when that is given and not blank. `search` is stripped, and both it and the title go through `str.casefold` before the substring test, so `STRASSE` finds `Straße`. `None`, an empty and a blank `search` all mean no title filter. The order is the repository's. A filter on another field, or one that the database should apply, means extending the protocol.
+- **The counts.** `TodoStats` is a frozen, slotted dataclass with the fields `open` and `done`; `total` is a property (`open + done`), not a field, so the three numbers cannot disagree. `stats()` calls `list_all()` once and counts that one list: `done` is the number of todos with the flag set, `open` is the rest. Like the filters, it counts in the service because the protocol has no count method; with many todos a count the database does itself would mean extending the protocol.
 
 ## API
 
@@ -116,7 +116,7 @@ What the service owns:
 | `schemas` | `TodoCreate`, `TodoUpdate`, `TodoRead` (with `from_domain`), `HealthRead`, `StatsRead` (with `from_stats`, which builds it from a `TodoStats`) and the `StorageKind` alias (`Literal["memory", "sqlite"]`): the Pydantic models at the boundary. They put no rule on `title`; the domain owns it |
 | `dependencies` | `get_service`, which returns the service stored on the app, and the `Service` annotation the routes take it through |
 | `errors` | `register_error_handlers`: the one place where domain errors and request validation errors become a status code and `{"detail": "..."}` |
-| `routes` | The `/todos` router; each handler calls the service and returns a `TodoRead` |
+| `routes` | The `/todos` router; each handler calls the service and returns a `TodoRead`. `list_todos` takes the optional query parameters `done` and `search`; `search` has `Query(max_length=MAX_TITLE_LENGTH)`, so the schema, not the service, refuses a longer one with a 422 |
 | `health` | The `/health` router (tag `health`); `read_health` reads the storage kind from `app.state` and never calls the service or the repository, so it answers when the database does not |
 | `stats` | The `/stats` router (tag `stats`); `read_stats` returns `StatsRead.from_stats(service.stats())` |
 | `app` | `create_app(service, *, storage="memory")`: titles the API `Todo service`, stores the service and the storage kind on `app.state`, includes the todo, health and stats routers, registers the handlers |
