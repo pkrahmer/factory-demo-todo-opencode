@@ -11,6 +11,7 @@ from app.api.app import create_app
 from app.repository.memory import InMemoryTodoRepository
 from app.service.todo_service import TodoService
 from tests.fakes import TickingClock
+from tests.responses import assert_only_detail
 
 UNKNOWN_ID = UUID(int=42)
 ID_ROUTES = [
@@ -47,13 +48,6 @@ def _get(client: TestClient, todo_id: object) -> dict[str, Any]:
 def _complete(client: TestClient, todo_id: object) -> None:
     response = client.patch(f"/todos/{todo_id}", json={"done": True})
     assert response.status_code == 200
-
-
-def _assert_only_detail(body: object, prefix: str = "") -> None:
-    assert isinstance(body, dict)
-    assert set(body) == {"detail"}
-    assert isinstance(body["detail"], str)
-    assert body["detail"].startswith(prefix)
 
 
 def test_create_returns_the_new_open_todo(client: TestClient) -> None:
@@ -147,7 +141,7 @@ def test_list_with_an_invalid_done_filter_is_rejected(client: TestClient) -> Non
     response = client.get("/todos?done=maybe")
 
     assert response.status_code == 422
-    _assert_only_detail(response.json(), "query.done: ")
+    assert_only_detail(response.json(), "query.done: ")
 
 
 def test_get_returns_the_todo(client: TestClient) -> None:
@@ -167,7 +161,7 @@ def test_an_id_that_is_no_uuid_is_rejected(
     response = client.request(method, "/todos/not-a-uuid", json=body)
 
     assert response.status_code == 422
-    _assert_only_detail(response.json(), "path.todo_id: ")
+    assert_only_detail(response.json(), "path.todo_id: ")
 
 
 def test_patch_done_completes_and_reopens_the_todo(client: TestClient) -> None:
@@ -210,7 +204,7 @@ def test_patch_that_sets_nothing_is_rejected_and_changes_nothing(
     response = client.patch(f"/todos/{todo['id']}", json=body)
 
     assert response.status_code == 422
-    _assert_only_detail(response.json())
+    assert_only_detail(response.json())
     assert _get(client, todo["id"]) == todo
 
 
@@ -305,4 +299,4 @@ def test_every_error_body_has_only_a_detail(
     response = client.request(method, path, json=body)
 
     assert response.status_code >= 400
-    _assert_only_detail(response.json())
+    assert_only_detail(response.json())

@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T14:04:28.569051Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -34,6 +30,12 @@ journal:
   kind: started
   at: '2026-10-19T14:04:28.569051Z'
   stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-10-19T14:05:44.213277Z'
+  stage: tests
+  run: 51fb2689995b43038cbd120295dd9b02
 ---
 
 # Title search
@@ -113,3 +115,27 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
    - Architecture: the service filters `list_all()` and touches no repository or domain code; the API only passes the parameter and the existing handler maps the validation error. This is consistent with the layers in `CLAUDE.md`.
    - Scope: within F0003's scope (title search in the service and as a query parameter); no index, repository method, ranking or fuzzy matching. The feature's decisions 1 to 4 are all covered by criteria.
 4. factory: started tests as opencode-demo.
+5. tester: Wrote tests for criteria 1–9 against the Interface; criteria 10–12 are checked by the existing openapi test, `make check` and the docs stage, so they get no new test.
+
+   - criterion 1: tests/service/test_search.py::test_search_returns_the_todos_whose_title_contains_the_text_in_creation_order
+   - criterion 2: tests/service/test_search.py::test_search_text_is_stripped
+   - criterion 3: tests/service/test_search.py::test_no_or_blank_search_means_no_title_filter (rows none, empty, spaces)
+   - criterion 4: tests/service/test_search.py::test_search_uses_case_folding
+   - criterion 5: tests/service/test_search.py::test_search_combines_with_the_done_filter (rows open, done)
+   - criterion 6: tests/api/test_search.py::test_search_returns_the_matching_todos_in_creation_order
+   - criterion 7: tests/api/test_search.py::test_search_combines_with_the_done_filter
+   - criterion 8: tests/api/test_search.py::test_search_length_is_limited_on_the_text_as_sent (rows 200-chars, 201-chars, 201-chars-padded)
+   - criterion 9: tests/api/test_search.py::test_list_without_parameters_returns_every_todo
+   - criterion 10: existing tests/api/test_openapi.py::test_committed_schema_matches_the_app, unchanged
+
+   Files created: tests/service/test_search.py, tests/api/test_search.py, tests/responses.py.
+   Earlier test file changed: tests/api/test_todos.py. Under the standing leave in CLAUDE.md (*Tests*) I moved its private helper `_assert_only_detail` to tests/responses.py as `assert_only_detail`, because the new API test would otherwise have copied it. Every test in test_todos.py keeps its name and checks the same thing.
+
+   Setup in the API tests goes through the `TodoService` handed to `create_app`, as test_todos.py::test_routes_use_the_service_given_to_create_app does, so the `_create`/`_complete` HTTP helpers are not copied.
+
+   Modules not importable: none. Every module imports; the tests fail because `TodoService.list` does not take `search` yet (TypeError in the service tests) and because the route ignores `search` (wrong result or status in the API tests).
+
+   Still green before implementation: criterion 7's test, because on the data the criterion gives `Buy Milk` is the only done todo, so `done=true` alone already returns it; and criterion 9's test, which checks the existing unfiltered listing. `make lint` is green. I skipped the type check, as this stage says to.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 12 failed, 175 passed, 20 warnings in 4.30s
