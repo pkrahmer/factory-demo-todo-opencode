@@ -7,6 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, model_validator
 
 from app.domain.model import Todo
+from app.service.todo_service import TodoStats
 
 StorageKind = Literal["memory", "sqlite"]
 
@@ -42,3 +43,13 @@ class HealthRead(BaseModel):
     status: Literal["ok"]
     version: str
     storage: StorageKind
+
+
+class StatsRead(BaseModel):
+    open: int
+    done: int
+    total: int
+
+    @classmethod
+    def from_stats(cls, stats: TodoStats) -> "StatsRead":
+        return cls(open=stats.open, done=stats.done, total=stats.total)

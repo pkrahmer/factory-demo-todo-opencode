@@ -44,6 +44,8 @@ All bodies are JSON. A todo is returned as:
 | GET | `/todos/{todo_id}` | | 200, the todo | 404, 422 |
 | PATCH | `/todos/{todo_id}` | `{"title": "..."}` and/or `{"done": true\|false}` | 200, the changed todo | 404, 422 |
 | DELETE | `/todos/{todo_id}` | | 204, empty body | 404, 422 |
+| GET | `/stats` | | 200, `{"open": n, "done": n, "total": n}` | |
+| GET | `/health` | | 200, `{"status": "ok", "version": "...", "storage": "..."}` (see *Health*) | |
 
 - **List filter.** `GET /todos?done=true` returns only the completed todos, `?done=false` only the open ones; without `done` all of them. Any other value is a 422.
 - **Ids.** A `todo_id` that is not a UUID is a 422, an unknown one a 404.
@@ -64,6 +66,23 @@ The handler never touches the service or the repository; it reads the storage ki
 
 ```bash
 curl -s localhost:8765/health
+```
+
+### Stats
+
+`GET /stats` counts the todos for a glance at the data. It answers 200 with exactly three fields:
+
+```json
+{"open": 2, "done": 1, "total": 3}
+```
+
+- `open` is the number of todos that are not completed, `done` the number that are, and `total` is `open + done`: every todo.
+- With no todos all three are `0`.
+- The counts are taken from one listing of the repository each time the endpoint is called; nothing is stored or cached, so a todo created, completed, reopened or deleted is counted by the next call.
+- It has no parameters (there is no filter) and no error response of its own, and it is tagged `stats` in the schema.
+
+```bash
+curl -s localhost:8765/stats
 ```
 
 ### Title rules

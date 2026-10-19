@@ -1,6 +1,7 @@
-"""The todo use cases: create, read, list, rename, complete, reopen and delete."""
+"""The todo use cases: create, read, list, rename, complete, reopen, delete and count."""
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -13,6 +14,19 @@ Clock = Callable[[], datetime]
 def utc_now() -> datetime:
     """Return the current time, timezone-aware in UTC."""
     return datetime.now(UTC)
+
+
+@dataclass(frozen=True, slots=True)
+class TodoStats:
+    """How many todos are open and how many are done."""
+
+    open: int
+    done: int
+
+    @property
+    def total(self) -> int:
+        """Return the number of all todos, open and done."""
+        return self.open + self.done
 
 
 class TodoService:
@@ -39,6 +53,12 @@ class TodoService:
         if done is None:
             return todos
         return [todo for todo in todos if todo.done is done]
+
+    def stats(self) -> TodoStats:
+        """Count the open and the done todos over one listing of the repository."""
+        todos = self._repository.list_all()
+        done = sum(1 for todo in todos if todo.done)
+        return TodoStats(open=len(todos) - done, done=done)
 
     def rename(self, todo_id: UUID, title: str) -> Todo:
         """Give the todo another title and return it; raise `InvalidTitle` or `TodoNotFound`."""

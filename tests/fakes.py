@@ -6,6 +6,7 @@ from uuid import UUID
 from app.domain.model import Todo
 
 T0 = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)
+HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
 
 
 class TickingClock:
