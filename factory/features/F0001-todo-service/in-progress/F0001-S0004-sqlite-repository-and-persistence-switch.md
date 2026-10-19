@@ -1,17 +1,13 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 4
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: intake
-  started_at: '2026-10-19T13:12:27.349326Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,12 @@ journal:
   kind: started
   at: '2026-10-19T13:12:27.349326Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-10-19T13:12:56.688256Z'
+  stage: intake
+  run: e71ef93ad74949288816f2c68857078c
 ---
 
 # SQLite repository and persistence switch
@@ -96,3 +98,16 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
 
 1. 2026-10-19 human: created.
 2. factory: started intake as opencode-demo.
+3. intake: accepted
+
+   - Interface: it names concrete modules and signatures. `src/app/repository/sqlite.py` has `SqliteTodoRepository(engine)` and `from_path(path: str | Path)`. `src/app/api/main.py` has `build_repository(environ: Mapping[str, str]) -> TodoRepository` and the module-level `app`. The table's columns, their types and the stored formats are spelled out. The change to `tests/repository/test_contract.py` (one factory, one class row) is named, with the human's leave and the standing helper-move leave. That file already has `REPOSITORY_FACTORIES` and `REPOSITORY_CLASSES` for the rows to go into.
+   - Criteria: each is testable by one test function or one parametrized test.
+     - Every behaviour the Interface comments state has a criterion. `__init__` creating the table and leaving rows alone is criterion 4. Creating the file is criterion 2. Reading the same file back through a second instance is criterion 3. The `str` and `Path` forms of `from_path` are criterion 12. The stored formats are criterion 11, with `id`, `created_at` and `done` as separate rows and another offset covered. The `TODO_DB` rule is criterion 7, with the missing, empty and set sides as rows. No file for an in-memory app is criterion 9. Import isolation is criterion 13. The no-inheritance rule is criterion 10.
+     - Both sides of each rule are covered. Missing or empty `TODO_DB` against set is criterion 7. Persisting against not writing a file is criteria 8 and 9. SQL-hostile input is criterion 6. The refused sides of the repository rules (`DuplicateTodo`, `TodoNotFound`, ordering) are held by the existing contract suite through criterion 1.
+     - The `title` and `done` NOT NULL constraints and the ordering across second boundaries are not separate criteria. The first is not an Interface behaviour that can fail through the repository's API. The second is the protocol's rule, already tested in the contract suite. I did not count either as a gap.
+   - Smoke test: the commands are runnable. They use a temporary directory, start uvicorn twice on port 8765 with the same `TODO_DB`, create a todo, restart, list, and test that the file exists. The `Expect:` line is checkable: three lines, the created JSON with the title, a list with the same id after the restart, and `database file exists`.
+   - Architecture: the placement fits `CLAUDE.md`.
+     - `app.repository.sqlite` implements the protocol structurally, imports only `app.domain` plus SQLAlchemy Core, and uses no ORM or SQL strings. This is consistent with the `project-no-sql-text` semgrep rule.
+     - Wiring stays in `app.api.main`, the only `app.api` module that imports `app.repository`. Criterion 13 holds that through the existing `tests/api/test_imports.py`.
+     - `app.domain` and `app.service` are untouched.
+   - Scope: it is within feature F0001. The scope lists the SQLite repository behind the same protocol, the contract suite and the persistence switch, and decisions 8, 14, 15 and 16 of `feature.md` are all reflected in the criteria. Nothing in "Out of scope" is touched.
