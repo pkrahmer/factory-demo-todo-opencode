@@ -7,7 +7,11 @@ crashes: 1
 pull_request: 7
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T13:40:23.589192Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -34,6 +38,11 @@ journal:
   speaker: factory
   kind: crash
   at: '2026-10-19T13:40:21.531288Z'
+  stage: tests
+- number: 6
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:40:23.589192Z'
   stage: tests
 ---
 
@@ -103,3 +112,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
    No questions. No story edits.
 4. factory: started tests as opencode-demo.
 5. factory: crash 1: the run of stage tests ended without a result. Its work is discarded back to commit 6c4ee3a92d80aabcc2e3378ed64fc7cef8f041e8.
+6. factory: started tests as opencode-demo.
