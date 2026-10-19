@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: smoke-test
+  started_at: '2026-10-19T13:21:49.709345Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -91,6 +95,11 @@ journal:
   at: '2026-10-19T13:21:29.108496Z'
   stage: docs
   run: a422ee5b5fa2421f9f27a5e21c700a74
+- number: 16
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:21:49.709345Z'
+  stage: smoke-test
 ---
 
 # SQLite repository and persistence switch
@@ -317,3 +326,4 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
     - The coder's notes in the journal (`select(_todos)` gives an untyped row, and each `from_path` never disposes its engine). The second is now in the project guide. The first is a typing detail, not for the reader of the docs.
 
     `check`: check: green
+16. factory: started smoke-test as opencode-demo.
