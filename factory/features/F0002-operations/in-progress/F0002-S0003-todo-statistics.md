@@ -1,17 +1,13 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 8
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: intake
-  started_at: '2026-10-19T13:49:56.262090Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,12 @@ journal:
   kind: started
   at: '2026-10-19T13:49:56.262090Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-10-19T13:50:22.347228Z'
+  stage: intake
+  run: c50385aa2d164979a155c425f078191c
 ---
 
 # Todo statistics
@@ -110,3 +112,9 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
 
 1. 2026-10-19 human: created.
 2. factory: started intake as opencode-demo.
+3. intake: accepted
+   - Interface: concrete modules and signatures (`TodoStats`, `TodoService.stats`, `StatsRead.from_stats`, `app/api/stats.py` router). They fit the existing code (`Service` dependency, health router pattern, `create_app` including routers). The stated behaviours (`total` derived, one pass, existing methods unchanged) are covered by criteria 4 and 5 and the existing tests.
+   - Criteria: each is testable by one test function without further decisions. Empty and mixed counts are criteria 1 and 2, frozen is 3, `total` not a field is 4, one `list_all` call and no other is 5, the endpoint on both data sets is 6, the route and tag with the other routes still present is 7, and the openapi file is 8. The Interface states no limit, validation or error, so no rule lacks its failing side.
+   - Smoke test: runnable. `build_app({})` selects the in-memory repository, and POST `/todos` and PATCH `/todos/{id}` with `done` exist. The Expect line is one exact output line and does not depend on which todo is completed.
+   - Architecture: the stats logic stays in `app.service` and uses the repository protocol's `list_all` only. The API imports the service type (api → service, allowed), and domain and repository are untouched. The router uses `Service` from `dependencies.py` and is included in `create_app`, so wiring stays in `app.api.main`.
+   - Scope: within `feature.md` (`GET /stats: open, done, total`; decisions 3 and 9) and outside its "Out of scope". No test of another story is changed.
