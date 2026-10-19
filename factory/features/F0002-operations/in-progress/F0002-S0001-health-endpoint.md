@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: review
+  started_at: '2026-10-19T13:33:47.251713Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -47,6 +51,11 @@ journal:
   at: '2026-10-19T13:33:26.308834Z'
   stage: doing
   run: 2321212d028447a29ae43ebd48cbeccb
+- number: 8
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:33:47.251713Z'
+  stage: review
 ---
 
 # Health endpoint
@@ -171,3 +180,4 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
 
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 7 dead code, in .reports/
+8. factory: started review as opencode-demo.
