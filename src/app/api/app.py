@@ -2,14 +2,18 @@
 
 from fastapi import FastAPI
 
+from app.api import health
 from app.api.errors import register_error_handlers
 from app.api.routes import router
+from app.api.schemas import StorageKind
 from app.service.todo_service import TodoService
 
 
-def create_app(service: TodoService) -> FastAPI:
+def create_app(service: TodoService, *, storage: StorageKind = "memory") -> FastAPI:
     app = FastAPI(title="Todo service")
     app.state.service = service
+    app.state.storage = storage
     app.include_router(router)
+    app.include_router(health.router)
     register_error_handlers(app)
     return app

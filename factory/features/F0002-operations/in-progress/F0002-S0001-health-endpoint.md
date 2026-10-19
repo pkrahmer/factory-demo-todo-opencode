@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T13:32:30.433763Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -45,6 +41,12 @@ journal:
   kind: started
   at: '2026-10-19T13:32:30.433763Z'
   stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-10-19T13:33:26.308834Z'
+  stage: doing
+  run: 2321212d028447a29ae43ebd48cbeccb
 ---
 
 # Health endpoint
@@ -153,3 +155,19 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
    `lint`: lint: green (0.0 s)
    `test`: 146 passed, 20 warnings, 1 error in 3.72s
 6. factory: started doing as opencode-demo.
+7. coder: Built the health endpoint and the `build_app` composition root. `make check` is green: 155 passed, coverage 100%.
+
+   - `src/app/api/health.py` (new): `router` has the tag `health`. `read_health` reads the storage kind from `request.app.state.storage` and the version from `importlib.metadata.version("app")`. It never touches the service or the repository.
+   - `src/app/api/schemas.py`: `HealthRead`, plus a type alias `StorageKind = Literal["memory", "sqlite"]`. `HealthRead.storage` and `create_app` both use it, so the two kinds are written in one place.
+   - `src/app/api/app.py`: `create_app(service, *, storage="memory")` stores `app.state.storage` and includes the health router beside the todo router.
+   - `src/app/api/main.py`: `build_app(environ)` builds the service from `build_repository` and passes the storage kind to `create_app`. `app = build_app(os.environ)`.
+   - `docs/openapi.json`: regenerated with `make openapi`.
+
+   Main decision: the rule "`TODO_DB` set and not empty means SQLite" now lives once, in a private `_storage_kind(environ)` in `main.py`. `build_repository` and `build_app` both use it, so the storage a monitor sees and the repository the routes get cannot drift apart. Rejected: deciding the kind in `build_app` with an `isinstance` check on the repository. It would tie the reported kind to concrete class names rather than to the environment rule, and it would add a second branch.
+
+   Refactor pass: I read the diff and found nothing to change.
+
+   Noticed, not touched: the spelled-out Literals in the Interface are replaced by the equivalent alias `StorageKind`. The behaviour and the schema are the same. The docs criterion (`docs/api.md`, README) is left for the documenter.
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 7 dead code, in .reports/

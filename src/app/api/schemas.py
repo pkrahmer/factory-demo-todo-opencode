@@ -1,12 +1,14 @@
 """The JSON bodies the API accepts and returns."""
 
 from datetime import datetime
-from typing import Self
+from typing import Literal, Self
 from uuid import UUID
 
 from pydantic import BaseModel, model_validator
 
 from app.domain.model import Todo
+
+StorageKind = Literal["memory", "sqlite"]
 
 
 class TodoCreate(BaseModel):
@@ -34,3 +36,9 @@ class TodoRead(BaseModel):
     @classmethod
     def from_domain(cls, todo: Todo) -> "TodoRead":
         return cls(id=todo.id, title=todo.title, done=todo.done, created_at=todo.created_at)
+
+
+class HealthRead(BaseModel):
+    status: Literal["ok"]
+    version: str
+    storage: StorageKind
