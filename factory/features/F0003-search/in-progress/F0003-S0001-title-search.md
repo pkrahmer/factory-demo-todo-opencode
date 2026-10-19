@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T14:04:28.569051Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -25,6 +29,11 @@ journal:
   at: '2026-10-19T14:04:07.925247Z'
   stage: intake
   run: 1505e4f93cd746f4b3858b17035e3923
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:04:28.569051Z'
+  stage: tests
 ---
 
 # Title search
@@ -103,3 +112,4 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
    - Smoke test: runnable (`build_app({})` exists, in-memory storage); the `Expect:` line is concrete: `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
    - Architecture: the service filters `list_all()` and touches no repository or domain code; the API only passes the parameter and the existing handler maps the validation error. This is consistent with the layers in `CLAUDE.md`.
    - Scope: within F0003's scope (title search in the service and as a query parameter); no index, repository method, ranking or fuzzy matching. The feature's decisions 1 to 4 are all covered by criteria.
+4. factory: started tests as opencode-demo.
