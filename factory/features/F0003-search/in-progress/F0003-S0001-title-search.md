@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T14:11:04.255880Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -80,6 +84,11 @@ journal:
   at: '2026-10-19T14:10:43.869601Z'
   stage: tests
   run: 62cb45d6c95c491e9a25fdc40dae2301
+- number: 14
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:11:04.255880Z'
+  stage: doing
 ---
 
 # Title search
@@ -276,3 +285,4 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
 
     `lint`: lint: green (0.0 s)
     `test`: test: green (5.7 s)
+14. factory: started doing as opencode-demo.
