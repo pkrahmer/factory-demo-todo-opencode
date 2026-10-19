@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T13:19:05.567989Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -78,6 +74,12 @@ journal:
   kind: started
   at: '2026-10-19T13:19:05.567989Z'
   stage: review
+- number: 13
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T13:19:29.770721Z'
+  stage: review
+  run: 80ced7fffb604eff9bbf70fe03948009
 ---
 
 # SQLite repository and persistence switch
@@ -266,3 +268,16 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
 12. factory: started review as opencode-demo.
+13. reviewer: no findings
+
+    The fix for round 0's finding holds. `_todo_from_row` in `src/app/repository/sqlite.py` now takes `Row[str, str, bool, str]` and unpacks the typed values. The `Any` import is gone, so the `Any` rule in `CLAUDE.md` *Architecture* holds.
+
+    The rest of the diff is as reviewed in round 0:
+    - Acceptance criteria 1–13 each have a test that checks what the criterion says. The missing, empty and set sides of `TODO_DB` are rows of one parametrized test, and the contract suite runs against both repositories. The coder's entry 11 reports `make check` green.
+    - The layers hold: wiring stays in `app.api.main`, and the repository implements the protocol structurally.
+    - Every statement is a Core construct, with no SQL in strings and no marker that silences a check.
+    - The Description matches what was built, and the docs criterion is still current.
+
+    Earlier tests changed:
+    - tests/repository/test_contract.py: the human's leave in the story's Interface (the `_sqlite` factory and the `SqliteTodoRepository` row in `REPOSITORY_CLASSES`), plus the standing leave in `CLAUDE.md` to move a shared helper (`make_todo` and the copy of `T0` now come from `tests/fakes.py`). Every test keeps its name and what it checks.
+    - tests/fakes.py: the standing leave to move a shared helper (`make_todo` moved in). Nothing already in the file changed.
