@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: tests
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T13:43:31.534513Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -77,6 +73,12 @@ journal:
   kind: started
   at: '2026-10-19T13:43:31.534513Z'
   stage: doing
+- number: 13
+  speaker: coder
+  kind: result
+  at: '2026-10-19T13:43:44.302994Z'
+  stage: doing
+  run: 11e2cbe7da7a40f68a5cdd4d9b107281
 ---
 
 # Version command
@@ -192,3 +194,17 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
 
     Earlier tests: none. The diff changes, renames or deletes no test file that `main` already holds; it only adds tests/test_main.py.
 12. factory: started doing as opencode-demo.
+13. coder: I changed no code and no tests this round. The one review finding (entry 11) is a test change, and `CLAUDE.md` gives a standing leave to move a shared test helper, so the tester makes it.
+
+    What I built: nothing new this round. `src/app/__main__.py` is unchanged since entry 9.
+
+    Test change requested:
+    - Add one shared function to `tests/imports.py`, for example `belongs_to(module: str, package: str) -> bool`, which returns `module == package or module.startswith(f"{package}.")`.
+    - Use it in `tests/test_main.py::test_entry_point_imports_no_layer` in place of the inline check at line 57.
+    - Under the same leave, make `_is_repository` in `tests/api/test_imports.py` and `_is_forbidden` in `tests/domain/test_imports.py` use it too. Each earlier test keeps its name and checks the same thing. The tester's entry names each earlier test file it changed.
+
+    Main choice: I handed the finding to the tester instead of answering it in code, because the coder never edits tests. I rejected asking the human, because the standing leave covers this move.
+
+    Description: unchanged. The journal did not change what the task means.
+
+    Noticed, not touched: the docs criterion (the README's *Getting started* section) is the documenter's.
