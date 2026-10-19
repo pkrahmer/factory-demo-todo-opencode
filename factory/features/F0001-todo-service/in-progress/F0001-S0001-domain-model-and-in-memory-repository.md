@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T12:46:56.392262Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -36,6 +40,11 @@ journal:
   at: '2026-10-19T12:46:36.144058Z'
   stage: tests
   run: c6fe28f8d77741858a4082e8c6b6a5b5
+- number: 6
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:46:56.392262Z'
+  stage: doing
 ---
 
 # Domain model and in-memory repository
@@ -240,3 +249,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
 
    `lint`: lint: green (0.0 s)
    `test`: 1 failed, 3 errors in 1.74s
+6. factory: started doing as opencode-demo.
