@@ -42,6 +42,29 @@
         "title": "HealthRead",
         "type": "object"
       },
+      "StatsRead": {
+        "properties": {
+          "done": {
+            "title": "Done",
+            "type": "integer"
+          },
+          "open": {
+            "title": "Open",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "open",
+          "done",
+          "total"
+        ],
+        "title": "StatsRead",
+        "type": "object"
+      },
       "TodoCreate": {
         "properties": {
           "title": {
@@ -179,6 +202,27 @@
         "summary": "Read Health",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/stats": {
+      "get": {
+        "operationId": "read_stats_stats_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Read Stats",
+        "tags": [
+          "stats"
         ]
       }
     },

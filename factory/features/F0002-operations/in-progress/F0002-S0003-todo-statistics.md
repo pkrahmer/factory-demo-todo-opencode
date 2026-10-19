@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T13:52:06.878891Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -45,6 +41,12 @@ journal:
   kind: started
   at: '2026-10-19T13:52:06.878891Z'
   stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-10-19T13:52:57.180357Z'
+  stage: doing
+  run: 4ba2596cb4e8418e93cb84179042c01c
 ---
 
 # Todo statistics
@@ -162,3 +164,19 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
    `lint`: lint: green (0.0 s)
    `test`: 3 failed, 165 passed, 20 warnings, 1 error in 3.93s
 6. factory: started doing as opencode-demo.
+7. coder: Built `GET /stats`, which returns the open, done and total counts of the todos. `make check` is green with 173 tests passing, and no test was changed.
+
+   - `src/app/service/todo_service.py`: added the frozen, slotted dataclass `TodoStats(open, done)`. `total` is a property that returns `open + done`. Added `TodoService.stats()`, which calls `list_all` once, counts the done todos and works out the open count as the list length minus the done count. The module docstring now also mentions counting.
+   - `src/app/api/schemas.py`: added `StatsRead(open, done, total)` with `from_stats`. It imports `TodoStats` from the service, which the layers allow (api → service).
+   - `src/app/api/stats.py` (new): `router = APIRouter(tags=["stats"])` with `GET /stats`, which uses the existing `Service` dependency.
+   - `src/app/api/app.py`: `create_app` includes `stats.router` after the health router.
+   - `docs/openapi.json`: regenerated with `make openapi`.
+
+   Main decision: count over a single `list_all` result in the service. I rejected a repository count query or a new protocol method, because the Description rules out new repository methods and criterion 5 requires exactly one `list_all` call. I also rejected filtering the list twice, once for open and once for done, because the Interface asks for one pass.
+
+   Refactor: I read my diff back and nothing needed changing. The journal did not change what the task means, so I left `## Description` as it is.
+
+   Noticed but not touched: `docs/api.md` (criterion 10) belongs to the documenter stage. Every test run prints a StarletteDeprecationWarning about `httpx` in the test client. It was there before this work and is outside this work item.
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/
