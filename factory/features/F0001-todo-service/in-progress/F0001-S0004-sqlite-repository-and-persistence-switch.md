@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T13:15:12.155369Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -36,6 +40,11 @@ journal:
   at: '2026-10-19T13:14:51.621368Z'
   stage: tests
   run: baaa7380b8204b1ebc93551a3b149e50
+- number: 6
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:15:12.155369Z'
+  stage: doing
 ---
 
 # SQLite repository and persistence switch
@@ -158,3 +167,4 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
 
    `lint`: lint: green (0.0 s)
    `test`: 109 passed, 20 warnings, 3 errors in 3.31s
+6. factory: started doing as opencode-demo.
