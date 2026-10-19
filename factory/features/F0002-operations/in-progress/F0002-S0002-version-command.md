@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: docs
+  started_at: '2026-10-19T13:47:01.095247Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -112,6 +116,11 @@ journal:
   at: '2026-10-19T13:46:40.160179Z'
   stage: review
   run: c5740499d55a4233bcffe639b026418e
+- number: 20
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:47:01.095247Z'
+  stage: docs
 ---
 
 # Version command
@@ -303,3 +312,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
     - `tests/api/test_imports.py`: changed under the standing leave to move a shared test helper. `_is_repository` now calls `belongs_to`; `test_only_main_imports_the_repository_layer` keeps its name and checks the same thing.
     - `tests/domain/test_imports.py`: changed under the standing leave to move a shared test helper. `_is_forbidden` now calls `belongs_to`; `test_domain_imports_no_framework_and_no_outer_layer` keeps its name and checks the same thing.
     - `tests/imports.py`: no leave needed. The change only adds `belongs_to` and leaves the existing helpers as they were.
+20. factory: started docs as opencode-demo.
