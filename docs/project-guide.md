@@ -2,7 +2,7 @@
 
 For anyone changing the to-do service: the layers, why they are drawn that way, and the domain model. `CLAUDE.md` holds the rules every change follows; this file explains what they protect.
 
-Built so far: the domain layer and an in-memory repository. The service, the API and the SQLite repository come in later stories.
+Built so far: the domain layer, an in-memory repository and the service layer. The API and the SQLite repository come in later stories.
 
 ## Layers
 
@@ -71,6 +71,26 @@ A repository satisfies the protocol structurally and does not inherit it; a test
 
 `app.repository.memory.InMemoryTodoRepository` keeps todos in a dictionary by id, for as long as the process runs. It sorts on `(created_at, id)` when listing.
 
+## Service
+
+`app.service.todo_service.TodoService` holds the use cases. It is built with a `TodoRepository` and a clock: `TodoService(repository, clock=utc_now)`. It imports only `app.domain` and the standard library; it reaches storage through the repository protocol and never imports `app.repository`, so any repository that satisfies the protocol works.
+
+| Method | Behaviour |
+| --- | --- |
+| `create(title)` | Builds a new open todo stamped with the clock, stores it and returns it; raises `InvalidTitle` before anything is stored |
+| `get(todo_id)` | Returns the todo; raises `TodoNotFound` |
+| `list(*, done=None)` | Returns the todos in the repository's order (creation order); `done=True` keeps the completed ones, `done=False` the open ones, `None` all |
+| `rename(todo_id, title)` | Returns the todo with the new title (stripped); id, done flag and `created_at` stay; raises `InvalidTitle` or `TodoNotFound`, and the stored todo is unchanged |
+| `complete(todo_id)` | Returns the todo with `done` true; completing a completed todo is not an error |
+| `reopen(todo_id)` | Returns the todo with `done` false; reopening an open todo is not an error |
+| `delete(todo_id)` | Removes the todo; raises `TodoNotFound` |
+
+What the service owns:
+
+- **The use cases.** Each one reads, changes through `Todo.with_title` or `Todo.with_done`, and writes back with `update`. The rules stay in the domain: the service has no title check of its own, and `InvalidTitle` and `TodoNotFound` reach the caller unchanged.
+- **The clock.** `Clock` is `Callable[[], datetime]`. `utc_now()` returns `datetime.now(UTC)` and is the default. The service reads the clock only in `create`; tests pass a fixed or a ticking clock so that times and order are observable.
+- **The done filter.** The repository protocol has no filtered list. The service takes `list_all()` and keeps the todos whose `done` flag matches, so the order is the repository's. A filter on another field, or one that the database should apply, means extending the protocol.
+
 ## Adding a repository
 
 1. Write the class in `app/repository/`, with no base class, importing only `app.domain`.
@@ -94,3 +114,22 @@ for t in repo.list_all(): print(t.done, repr(t.title), t.created_at.isoformat())
 ```
 
 Prints `True 'Buy milk' 2026-10-04T12:00:00+00:00`, then `False 'Write the next story' 2026-10-04T12:01:00+00:00`: creation order although `b` was added first, the title stripped.
+
+The same through the service, which stamps the time itself:
+
+```bash
+uv run python -c "
+from datetime import UTC, datetime
+from app.repository.memory import InMemoryTodoRepository
+from app.service.todo_service import TodoService
+svc = TodoService(InMemoryTodoRepository(), clock=lambda: datetime(2026, 10, 4, 12, 0, tzinfo=UTC))
+a = svc.create('  Buy milk ')
+b = svc.create('Write the next story')
+svc.complete(a.id)
+print([t.title for t in svc.list(done=True)])
+print([t.title for t in svc.list(done=False)])
+print(svc.rename(b.id, 'Write story S0003').title, svc.get(b.id).created_at.isoformat())
+"
+```
+
+Prints `['Buy milk']`, then `['Write the next story']`, then `Write story S0003 2026-10-04T12:00:00+00:00`.

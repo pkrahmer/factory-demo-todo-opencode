@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: docs
-  started_at: '2026-10-19T12:56:49.322533Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -67,6 +63,12 @@ journal:
   kind: started
   at: '2026-10-19T12:56:49.322533Z'
   stage: docs
+- number: 11
+  speaker: documenter
+  kind: result
+  at: '2026-10-19T12:57:26.042873Z'
+  stage: docs
+  run: 5153312f718b402dbead327a41fd3465
 ---
 
 # Service layer with filtering
@@ -254,3 +256,19 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
    Earlier tests: none. Every test file in the diff is new (status `A`), and no test file that `main` already holds was changed.
 10. factory: started docs as opencode-demo.
+11. documenter: I documented the service layer. I did not run `make check`: I changed only documents, and the factory runs it after me. I ran the story's first smoke-test block, which I added to the guide, and it printed the three expected lines.
+
+    Files changed:
+    - `docs/project-guide.md`:
+      - The "Built so far" line now includes the service layer.
+      - A new `## Service` section gives a method table and says what `TodoService` owns: the use cases, the clock (`Clock`, `utc_now`) and the done filter. It says the service reaches storage only through the repository protocol and never imports `app.repository`. It also says the filter runs in the service over `list_all()`, and that a filter the database should apply means extending the protocol.
+      - "Try it" gains a second example, run through the service.
+    - `README.md`: the "Where to look next" line for `docs/project-guide.md` now mentions the service.
+
+    Cross-read and found current: the layers table, the layer rules, the domain model, errors, repository protocol and in-memory repository sections of `docs/project-guide.md`, and the `app.service` row of the layers table, which already matched the code. I also compared the Interface with `src/app/service/todo_service.py`. They agree, and the module, class, `utc_now` and public-method docstrings are present. I found no findings for the coder.
+
+    Stale text I noticed but did not touch:
+    - `CLAUDE.md` names `docs/api.md` and `docs/decisions.md`, which do not exist yet. They presumably come with later stories, and `CLAUDE.md` is not mine to edit.
+    - The method name `list` hides the built-in inside the class body. The coder and the reviewer both noted it. It is harmless today and is not a documentation matter.
+
+    `check`: check: green
