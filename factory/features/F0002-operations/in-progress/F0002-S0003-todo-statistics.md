@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: smoke-test
+  started_at: '2026-10-19T13:55:22.749225Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -69,6 +73,11 @@ journal:
   at: '2026-10-19T13:55:02.458884Z'
   stage: docs
   run: e263f6d5cde94a8bbcb3c4fb4941e969
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:55:22.749225Z'
+  stage: smoke-test
 ---
 
 # Todo statistics
@@ -231,3 +240,4 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
     Stale or missing, not mine to fix: `docs/decisions.md`, which `CLAUDE.md` names, does not exist yet. Nothing in this story needed a lasting reason, so I did not create it. Every test run prints a Starlette deprecation warning about `httpx`; the coder noted it too, and it is unrelated.
 
     `check`: check: green
+12. factory: started smoke-test as opencode-demo.
