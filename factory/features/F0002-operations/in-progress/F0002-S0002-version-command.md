@@ -1,17 +1,13 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
-crashes: 1
+crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T13:40:23.589192Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -44,6 +40,12 @@ journal:
   kind: started
   at: '2026-10-19T13:40:23.589192Z'
   stage: tests
+- number: 7
+  speaker: tester
+  kind: result
+  at: '2026-10-19T13:41:14.428596Z'
+  stage: tests
+  run: 9331f7b86f274ce896764cd218ddd653
 ---
 
 # Version command
@@ -113,3 +115,18 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
 4. factory: started tests as opencode-demo.
 5. factory: crash 1: the run of stage tests ended without a result. Its work is discarded back to commit 6c4ee3a92d80aabcc2e3378ed64fc7cef8f041e8.
 6. factory: started tests as opencode-demo.
+7. tester: I wrote the tests for criteria 1–5 in a new file, `tests/test_main.py`, against the Interface of `src/app/__main__.py`. They call `main` and capture its output with `capsys`. Criterion 4 reuses the existing helper `tests/imports.py` (`APP_DIR`, `imported_modules`) and names only the forbidden layers. Criterion 5 runs the module as a child process with `sys.executable`. The expected version line is `f"app {importlib.metadata.version('app')}\n"`.
+
+   - criterion 1: tests/test_main.py::test_version_flag_prints_the_installed_version
+   - criterion 2: tests/test_main.py::test_any_other_arguments_are_a_usage_error (rows: [], ["--help"], ["x"], ["--version", "x"])
+   - criterion 3: tests/test_main.py::test_main_without_argument_reads_sys_argv (rows: ["app", "--version"] → 0, ["app"] → 2)
+   - criterion 4: tests/test_main.py::test_entry_point_imports_no_layer
+   - criterion 5: tests/test_main.py::test_running_the_module_as_a_child_process (rows: --version → 0 with the version line on stdout and an empty stderr; no argument → 2 with an empty stdout and the usage line on stderr)
+   - criterion 6 (`make check`) and criterion 7 (docs) have no test of their own.
+
+   Files created: tests/test_main.py. No earlier test file was changed.
+
+   Module the test runner could not import: `app.__main__`, which does not exist yet. `make test` stops with an ImportError while collecting tests/test_main.py. All 155 existing tests pass. `make lint` is green. I did not have to interpret any criterion, so there is no open question.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 155 passed, 20 warnings, 1 error in 6.79s
