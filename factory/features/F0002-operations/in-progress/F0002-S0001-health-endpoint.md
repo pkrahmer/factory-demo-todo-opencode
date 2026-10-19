@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T13:31:16.163079Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -34,6 +30,12 @@ journal:
   kind: started
   at: '2026-10-19T13:31:16.163079Z'
   stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-10-19T13:32:09.035758Z'
+  stage: tests
+  run: f07992d8a1b64bc0941a99afab3c6740
 ---
 
 # Health endpoint
@@ -124,3 +126,20 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
    - Architecture: Fits the layers. `app.api` holds the router, schema and wiring, and `build_app` sits in the composition root, which is the only place that chooses the concrete repository. `/health` reads the storage kind from app state and never touches the service or repository. `HealthRead` is a Pydantic boundary model. No new dependency.
    - Scope: Inside F0002's scope (`GET /health`: status, version, storage kind). It touches nothing in "Out of scope". Feature decisions 1, 6 and 7 are each covered by a criterion (4, 3, 5).
 4. factory: started tests as opencode-demo.
+5. tester: Wrote the tests for the health endpoint, one test function per testable criterion, all in `tests/api/test_health.py`, through `TestClient`.
+
+   - criterion 1: tests/api/test_health.py::test_health_reports_ok_version_and_memory_by_default (exact body, version from `importlib.metadata.version("app")`)
+   - criterion 2: tests/api/test_health.py::test_health_reports_the_storage_given_to_create_app
+   - criterion 3: tests/api/test_health.py::test_build_app_reports_the_storage_the_environment_chose (three rows: missing, empty, set; uses the shared `db_path` fixture)
+   - criterion 4: tests/api/test_health.py::test_health_does_not_touch_the_repository (`RaisingRepository` is a structural fake of `TodoRepository` in this module; every method raises)
+   - criterion 5: tests/api/test_health.py::test_build_app_hands_the_todo_routes_the_chosen_repository (two rows: sqlite, where a second app sees the todo, and memory, where it does not; the first app lists the todo in both rows)
+   - criterion 6: tests/api/test_health.py::test_schema_names_health_with_its_tag_beside_the_todo_paths (on `create_app(service).openapi()`)
+   - criterion 7: the existing tests/api/test_openapi.py::test_committed_schema_matches_the_app; no new test, and the coder runs `make openapi`
+   - criteria 8 and 9 (`make check`, docs): no test.
+
+   Files created: tests/api/test_health.py. No earlier test file changed.
+
+   `make test`: the run could not import `tests/api/test_health.py`, because `app.api.main` has no `build_app` yet. The test would also fail on the `create_app(..., storage=...)` keyword and on the missing `/health` route. The other 146 tests pass. `make lint` is green.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 146 passed, 20 warnings, 1 error in 3.72s
