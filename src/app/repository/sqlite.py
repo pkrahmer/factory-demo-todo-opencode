@@ -2,7 +2,6 @@
 
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 from uuid import UUID
 
 from sqlalchemy import (
@@ -56,12 +55,13 @@ def _with_todo_values[S: (Insert, Update)](statement: S, todo: Todo) -> S:
     )
 
 
-def _todo_from_row(row: Row[Any]) -> Todo:
+def _todo_from_row(row: Row[str, str, bool, str]) -> Todo:
+    stored_id, title, done, created_at = row
     return Todo(
-        id=UUID(row.id),
-        title=row.title,
-        done=row.done,
-        created_at=datetime.fromisoformat(row.created_at),
+        id=UUID(stored_id),
+        title=title,
+        done=done,
+        created_at=datetime.fromisoformat(created_at),
     )
 
 

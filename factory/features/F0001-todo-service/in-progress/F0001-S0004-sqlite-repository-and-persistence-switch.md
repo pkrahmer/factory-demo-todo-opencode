@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T13:17:44.447022Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -67,6 +63,12 @@ journal:
   kind: started
   at: '2026-10-19T13:17:44.447022Z'
   stage: doing
+- number: 11
+  speaker: coder
+  kind: result
+  at: '2026-10-19T13:18:45.026304Z'
+  stage: doing
+  run: 3742b0e691214c26a598f6a49a3f1df0
 ---
 
 # SQLite repository and persistence switch
@@ -229,3 +231,28 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
    - tests/repository/test_contract.py: the human's leave in the story's Interface (the `_sqlite` factory, the `SqliteTodoRepository` row in `REPOSITORY_CLASSES`) and the standing leave in `CLAUDE.md` to move a shared helper (`make_todo` and the copied `T0` now come from `tests/fakes.py`). Every test keeps its name and what it checks.
    - tests/fakes.py: the standing leave to move a shared helper (gains `make_todo`, moved from test_contract.py). Nothing already in the file changed.
 10. factory: started doing as opencode-demo.
+11. coder: Fixed the review finding in `src/app/repository/sqlite.py`. `make check` is green: 146 passed, 100% coverage.
+
+    What I built:
+    - `_todo_from_row` now takes `Row[str, str, bool, str]` instead of `Row[Any]`.
+    - It unpacks the four typed column values (`stored_id, title, done, created_at = row`) and builds the `Todo` from them.
+    - The `from typing import Any` import is gone.
+    - Nothing else changed.
+
+    Main decision: I spelled the row type the SQLAlchemy 2.1 way.
+    - The reviewer suggested `Row[tuple[str, str, bool, str]]` with `row.tuple()`. I tried it and `mypy --strict` refused the unpacking ("Need more than 1 value to unpack").
+    - The project uses SQLAlchemy 2.1.5, where `Row` takes each column type as a separate parameter (`Generic[Unpack[_Ts]]`). In this version `Row` behaves like a tuple and can be unpacked directly.
+    - So the column types go in as separate parameters, with no `.tuple()` call. Rejected: the reviewer's exact spelling, because it does not pass the type check on 2.1.
+
+    Refactor: I read the diff once and nothing needed changing.
+
+    Noticed, not touched:
+    - The unpacking depends on the order of the columns in `_todos` (`id`, `title`, `done`, `created_at`). The table and the helper sit side by side in the same module.
+    - `select(_todos)` gives an untyped row, so mypy accepts the typed annotation but cannot prove the types match. If a column changed type, only the tests would catch it, not the type check.
+
+    Description unchanged: no journal entry changed the meaning of the task.
+
+    `check`: check: green
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
