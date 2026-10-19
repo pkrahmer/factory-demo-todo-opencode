@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T13:44:04.823884Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -79,6 +83,11 @@ journal:
   at: '2026-10-19T13:43:44.302994Z'
   stage: doing
   run: 11e2cbe7da7a40f68a5cdd4d9b107281
+- number: 14
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:44:04.823884Z'
+  stage: tests
 ---
 
 # Version command
@@ -208,3 +217,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
     Description: unchanged. The journal did not change what the task means.
 
     Noticed, not touched: the docs criterion (the README's *Getting started* section) is the documenter's.
+14. factory: started tests as opencode-demo.
