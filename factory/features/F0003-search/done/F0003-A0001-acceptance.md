@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 0
 attempts: 0
@@ -20,8 +20,13 @@ journal:
   at: '2026-10-19T14:21:22.406908Z'
   stage: acceptance
   run: ae2ea068082a4717bf97753bdb72e0e2
+- number: 3
+  speaker: factory
+  kind: done
+  at: '2026-10-19T14:22:41.204807Z'
+  stage: done
 stories: [F0003-S0001]
-outcome: null
+outcome: accepted
 ---
 
 # Acceptance of Search
@@ -169,3 +174,4 @@ None. The one finding of weight, `make mutants` being red on `TodoService.list`,
    6. Decisions: the 4 in `feature.md` plus 3 defaults from the journals, listed. The shakedown acceptance that decision 3 cites is not in git. Earlier tests `test_todos.py`, `test_stats.py` and `test_todo_service.py` were changed under the standing leave and named. None was changed without a leave.
    7. Slow checks: none beyond `make check` and `make mutants`. The slowest test is 0.102 s and all 187 take 2.84 s. Disk is unchanged against the previous record.
    8. Cost: 1 story, 10 runs, 6.6 min, $1.87. The fixture rework round took 4 runs (about $0.83). 0 questions, 0.0 h waited.
+3. factory: done (pull request merged); cost: 1 runs, 3.7 min, 30 turns, 65724 tokens in (1281004 more from cache), 15245 out, $0.89
