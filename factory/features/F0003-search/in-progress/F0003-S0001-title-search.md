@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T14:12:23.416419Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -100,6 +96,12 @@ journal:
   kind: started
   at: '2026-10-19T14:12:23.416419Z'
   stage: review
+- number: 17
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T14:12:44.997280Z'
+  stage: review
+  run: 49e14edd906c461abf224a0320ee9b2b
 ---
 
 # Title search
@@ -320,3 +322,24 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/
 16. factory: started review as opencode-demo.
+17. reviewer: Round 1. I reviewed `git diff main...HEAD -- . ':!factory'`, leaving out the generated `docs/openapi.json`, and checked it against the work item.
+
+    **Source.** `TodoService.list` filters the repository's list by `done` first, then by `search`. It strips the text and case-folds both it and the title, so `None` and blank text both mean no title filter. The order stays the repository's. `list_todos` declares `search` with `Query(max_length=MAX_TITLE_LENGTH)`, so the limit applies to the text as sent, and passes it to the service. The layers hold: the service touches only the repository protocol, and the API imports a constant from the domain. The service docstring describes both filters. There is no new marker that silences a check and no new secrets-baseline entry.
+
+    **Criteria.** Criteria 1–9 each have a test that checks what the criterion says:
+    - Criteria 3 and 5 are rows of one parametrized test each.
+    - Criterion 8 tests both sides of the limit in one parametrized test: 200 characters gives 200 and `[]`, 201 gives 422 with a `query.search: ` detail, and 197 spaces plus `milk` also gives 422.
+    - Criterion 10 is the existing openapi test, unchanged.
+    - In entry 15 the coder reports `make check` green, with 187 tests passing.
+
+    **Round 0 findings.** Findings 1–3 were copied fixtures. They are closed: `ticking_service`, `client`, `three_todos` and `milk_done_and_open` now each exist once, in `tests/conftest.py`. Neither new test file defines a local copy.
+
+    **Work item.** The journal explains the main decision (filtering step by step) and what was rejected (a single comprehension). The Description matches what was built, and criterion 12 still says what the documenter must write.
+
+    no findings
+
+    Earlier tests:
+    - tests/api/test_todos.py: changed under the standing leave to move a shared test helper. `_assert_only_detail` moved to `tests/responses.py`, and the `service` and `client` copies moved to the shared `ticking_service` and `client`. Every test keeps its name and checks the same thing.
+    - tests/api/test_stats.py: changed under the standing leave to move a shared test helper. Its `service` copy was replaced by the shared `ticking_service`, and the test keeps its name and check.
+    - tests/service/test_todo_service.py: changed under the standing leave to move a shared test helper. Its `ticking_service` copy was removed in favour of the shared one, and its fixed-clock `service` stays.
+    - tests/conftest.py: no leave needed. The change only adds fixtures and leaves `db_path` as it was.
