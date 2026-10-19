@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: docs
-  started_at: '2026-10-19T13:09:04.337954Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -84,6 +80,12 @@ journal:
   kind: started
   at: '2026-10-19T13:09:04.337954Z'
   stage: docs
+- number: 14
+  speaker: documenter
+  kind: result
+  at: '2026-10-19T13:10:07.116116Z'
+  stage: docs
+  run: b5f1168aeca94f358d8be1378edb5678
 ---
 
 # HTTP API
@@ -383,3 +385,30 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     - `tests/service/test_todo_service.py`: standing leave to move a shared test helper. `T0` and `TickingClock` moved to `tests/fakes.py`, and every test keeps its name and what it checks.
     - `tests/domain/test_imports.py`: standing leave to move a shared test helper. `_imported_modules` moved to `tests/imports.py` as `imported_modules`, which now works out the package from `src/app`. For domain files it gives the same package as before, and the test keeps its name and what it checks.
 13. factory: started docs as opencode-demo.
+14. documenter: Wrote the documentation for criterion 26 and cross-read the rest. No findings: the code matches the Interface and the criteria.
+
+    Files changed:
+    - `docs/api.md` (new):
+      - Covers how to run the server and each endpoint (method, path, body, success and error statuses).
+      - Covers the `done` filter, the title rules (strip first, blank, 200/201 limit), the `PATCH` rules, and the one error body `{"detail": "..."}` with the status mapping.
+      - Has curl examples for create and list, plus complete and delete.
+      - Notes that a `PATCH` setting both fields is two repository writes, taken from the coder's open point.
+    - `README.md`:
+      - *Getting started* now shows how to start the server and names `/docs` for the interactive schema, with a curl create and list.
+      - *Where to look next* links `docs/api.md` and mentions the API modules in the project-guide line.
+    - `docs/project-guide.md`:
+      - "Built so far" now includes the HTTP API.
+      - A new *API* section lists the `app.api` modules, how the service is wired per app, and where to add an error mapping.
+      - It records that `DuplicateTodo` has no mapping because ids are generated server-side.
+
+    Cross-read and found current:
+    - `docs/project-guide.md`: the layers table, which already listed `app.api` and `app.api.main` as the wiring place; the domain, errors, repository and service sections; the Try it examples.
+    - `CLAUDE.md`'s Docs section: it names `docs/api.md` and `docs/decisions.md`.
+    - `docs/openapi.json`: generated, not read or edited; criterion 21's test keeps it current.
+
+    Seen but not touched:
+    - The README intro says todos are "kept in memory or in a SQLite file". SQLite arrives in a later story, so today only memory is true. I left the sentence because the intro says the README grows with the build. The SQLite story's docs should settle it.
+    - `docs/decisions.md` does not exist yet, though `CLAUDE.md` names it. The coder's main decision (typed handlers registered with `app.exception_handler`) is in the journal only; the human decides whether it belongs in a decision log.
+    - The detail text after the location prefix (for example `Input should be a valid UUID, ...`) is Pydantic's wording. `docs/api.md` says only the prefix (`body`, `query`, `path`) is stable.
+
+    `check`: check: green
