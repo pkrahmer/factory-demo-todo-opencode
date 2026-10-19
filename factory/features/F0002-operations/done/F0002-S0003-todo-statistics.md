@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 0
 attempts: 0
@@ -80,6 +80,11 @@ journal:
   at: '2026-10-19T13:55:46.317968Z'
   stage: smoke-test
   run: b9b54aca9a28440b9c99021bad9e9162
+- number: 14
+  speaker: factory
+  kind: done
+  at: '2026-10-19T13:57:04.782801Z'
+  stage: approval
 ---
 
 # Todo statistics
@@ -262,3 +267,4 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
     - I did not run `make check` (criterion 9); the factory runs it as this stage's check.
 
     No findings. Nothing is open.
+14. factory: done (pull request merged); cost: 6 runs, 3.4 min, 32 turns, 143339 tokens in (530939 more from cache), 16755 out, $0.95
