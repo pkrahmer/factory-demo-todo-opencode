@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T12:54:46.987156Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -36,6 +40,11 @@ journal:
   at: '2026-10-19T12:54:25.555009Z'
   stage: tests
   run: 43eff077b37f4883af1d566f2ef20456
+- number: 6
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:54:46.987156Z'
+  stage: doing
 ---
 
 # Service layer with filtering
@@ -177,3 +186,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
    `lint`: lint: green (0.0 s)
    `test`: 56 passed, 1 error in 1.62s
+6. factory: started doing as opencode-demo.
