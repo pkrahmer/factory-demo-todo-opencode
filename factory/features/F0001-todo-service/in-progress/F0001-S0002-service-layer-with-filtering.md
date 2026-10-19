@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: review
+  started_at: '2026-10-19T12:56:01.714482Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -47,6 +51,11 @@ journal:
   at: '2026-10-19T12:55:41.439338Z'
   stage: doing
   run: f7d28482eb034c8281d3e61214ef674c
+- number: 8
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:56:01.714482Z'
+  stage: review
 ---
 
 # Service layer with filtering
@@ -210,3 +219,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
+8. factory: started review as opencode-demo.
