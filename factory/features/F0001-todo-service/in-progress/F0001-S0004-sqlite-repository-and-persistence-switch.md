@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: smoke-test
-  started_at: '2026-10-19T13:21:49.709345Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -100,6 +96,12 @@ journal:
   kind: started
   at: '2026-10-19T13:21:49.709345Z'
   stage: smoke-test
+- number: 17
+  speaker: smoke-tester
+  kind: result
+  at: '2026-10-19T13:22:15.392660Z'
+  stage: smoke-test
+  run: f699b87d74374ad1bfa5748e53afaeb9
 ---
 
 # SQLite repository and persistence switch
@@ -327,3 +329,27 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
 
     `check`: check: green
 16. factory: started smoke-test as opencode-demo.
+17. smoke-tester: I ran the `## Smoke test` commands once, from the repository root, exactly as written and in order. Both starts use the same `TODO_DB` file in a `mktemp -d` directory under `$TMPDIR`. The server is started in the background and polled until it answers. A todo is created, the server is restarted, the todos are listed, and the script checks that the database file exists. The script's `trap` stopped the server and removed the temporary directory. The script exited 0.
+
+    Output (the whole output, 3 lines):
+
+    ```
+    {"id":"4af1da0f-f72a-4cca-bf50-47692a3b53e4","title":"Survive a restart","done":false,"created_at":"2026-10-19T13:22:02.889230Z"}
+    [{"id":"4af1da0f-f72a-4cca-bf50-47692a3b53e4","title":"Survive a restart","done":false,"created_at":"2026-10-19T13:22:02.889230Z"}]
+    database file exists
+    ```
+
+    Against the `Expect:` line: **met**.
+    - Line 1 is the created todo as JSON, with `"title":"Survive a restart"`.
+    - Line 2 is the list after the restart. It holds exactly that one todo, with the same id `4af1da0f-…-47692a3b53e4` and the same `created_at`.
+    - Line 3 is `database file exists`.
+
+    Against the acceptance criteria: nothing is contradicted.
+    - The run is direct evidence for criterion 8: a todo persists across two apps built on the same `TODO_DB` path, here two real server processes.
+    - It is also direct evidence for criterion 2's file creation: the file did not exist before the first start and existed afterwards.
+    - `created_at` came back unchanged after the restart, which fits criterion 5. The API shows it with a `Z` suffix, as before this story. That is the API's format, not the stored one, so it does not bear on criterion 11.
+    - The run says nothing about the other criteria, and nothing in it goes against them.
+
+    Findings: none.
+
+    Open: nothing.
