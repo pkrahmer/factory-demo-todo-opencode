@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 
 from app.api.main import app
+from tests.fakes import HTTP_METHODS
 
 OPENAPI_FILE = Path(__file__).parents[2] / "docs" / "openapi.json"
-HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
 
 
 def test_committed_schema_matches_the_app() -> None:

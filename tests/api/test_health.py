@@ -14,9 +14,9 @@ from app.api.main import build_app
 from app.domain.model import Todo
 from app.repository.memory import InMemoryTodoRepository
 from app.service.todo_service import TodoService
+from tests.fakes import HTTP_METHODS
 
 Environ = Callable[[Path], dict[str, str]]
-HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
 
 
 class RaisingRepository:

@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T13:50:42.490706Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -34,6 +30,12 @@ journal:
   kind: started
   at: '2026-10-19T13:50:42.490706Z'
   stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-10-19T13:51:46.270472Z'
+  stage: tests
+  run: dc67d5f03e3d4a8399999685d64e5643
 ---
 
 # Todo statistics
@@ -128,3 +130,25 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
    - Architecture: the stats logic stays in `app.service` and uses the repository protocol's `list_all` only. The API imports the service type (api → service, allowed), and domain and repository are untouched. The router uses `Service` from `dependencies.py` and is included in `create_app`, so wiring stays in `app.api.main`.
    - Scope: within `feature.md` (`GET /stats: open, done, total`; decisions 3 and 9) and outside its "Out of scope". No test of another story is changed.
 4. factory: started tests as opencode-demo.
+5. tester: Wrote the tests for the todo statistics, one test per criterion. They are red on purpose and are the coder's specification.
+
+   - criterion 1: tests/service/test_stats.py::test_stats_of_an_empty_repository_are_zero
+   - criterion 2: tests/service/test_stats.py::test_stats_count_open_and_done_todos
+   - criterion 3: tests/service/test_stats.py::test_stats_are_frozen
+   - criterion 4: tests/service/test_stats.py::test_total_is_not_a_dataclass_field
+   - criterion 5: tests/service/test_stats.py::test_stats_read_the_repository_with_one_list_all_call (`CountingRepository` in the module wraps `InMemoryTodoRepository` and records every method call. The data is added to the inner repository before wrapping, so only the calls of `stats()` are recorded. The test expects exactly `["list_all"]`.)
+   - criterion 6: tests/api/test_stats.py::test_get_stats_returns_the_counts (one parametrized test with two rows: `mixed` and `empty`)
+   - criterion 7: tests/api/test_stats.py::test_schema_names_stats_with_its_tag_beside_the_other_paths (uses `app.api.main.app.openapi()`)
+   - criterion 8: tests/api/test_openapi.py::test_committed_schema_matches_the_app (existing test, unchanged; the coder runs `make openapi`)
+   - criteria 9 and 10: `make check` and the docs; nothing to test.
+
+   Files created: tests/service/test_stats.py, tests/api/test_stats.py.
+
+   Earlier test files changed under the standing leave to move a shared test helper: the `HTTP_METHODS` constant was copied in tests/api/test_health.py and tests/api/test_openapi.py, and the new test needs it too. I moved it to tests/fakes.py and changed both files to import it from there. Every test keeps its name and checks the same thing.
+
+   `make test` result: 3 failed, 165 passed, 1 error. tests/service/test_stats.py cannot be imported because `TodoStats` is not yet in `app.service.todo_service`. The API tests fail because `/stats` returns 404 and is missing from the schema. No other module failed to import. `make lint` is green.
+
+   Nothing is open.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 3 failed, 165 passed, 20 warnings, 1 error in 3.93s
