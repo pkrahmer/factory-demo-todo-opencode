@@ -12,6 +12,7 @@ make check    # everything the pipeline checks: lint, types, layers, static anal
 ## Where to look next
 
 - `CLAUDE.md`: the rules every change follows (architecture, tests, checks)
+- `docs/project-guide.md`: the layers and their reasons, and the domain model (the `Todo` entity, its title rule, the errors, the repository protocol)
 
 ## How it is built
 
