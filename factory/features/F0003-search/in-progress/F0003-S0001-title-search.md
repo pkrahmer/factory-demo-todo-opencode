@@ -1,17 +1,13 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: intake
-  started_at: '2026-10-19T14:03:37.359907Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,12 @@ journal:
   kind: started
   at: '2026-10-19T14:03:37.359907Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-10-19T14:04:07.925247Z'
+  stage: intake
+  run: 1505e4f93cd746f4b3858b17035e3923
 ---
 
 # Title search
@@ -95,3 +97,9 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
 
 1. 2026-10-19 human: created.
 2. factory: started intake as opencode-demo.
+3. intake: accepted
+   - Interface: `TodoService.list(*, done, search)` in `src/app/service/todo_service.py` and `list_todos` in `src/app/api/routes.py` are concrete and fit the current code. `MAX_TITLE_LENGTH` exists in `app.domain.model` (200). Every rule is stated: strip, `casefold` substring, `None` or blank means no filter, combine with `done`, repository order, 200-character limit counted as sent.
+   - Criteria: each is testable by one test function without further decisions. Every Interface behaviour has a criterion (match and order 1 and 6, strip 2, None/empty/blank 3, casefold 4, combination with both `done` values 5 and 7, unfiltered listing 9). The limit has both sides (8): 200 gives 200 and `[]`, 201 gives 422, and the padded 197 spaces plus `milk` gives 422. The 422 body is checkable (`detail` only, starting with `query.search: `, matching the joined location in `app.api.errors`). Criteria 10 and 11 cover openapi and `make check`; no existing test is changed.
+   - Smoke test: runnable (`build_app({})` exists, in-memory storage); the `Expect:` line is concrete: `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
+   - Architecture: the service filters `list_all()` and touches no repository or domain code; the API only passes the parameter and the existing handler maps the validation error. This is consistent with the layers in `CLAUDE.md`.
+   - Scope: within F0003's scope (title search in the service and as a query parameter); no index, repository method, ranking or fuzzy matching. The feature's decisions 1 to 4 are all covered by criteria.
