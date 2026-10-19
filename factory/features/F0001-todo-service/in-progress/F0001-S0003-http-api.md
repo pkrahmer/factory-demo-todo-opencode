@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: docs
+  started_at: '2026-10-19T13:09:04.337954Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -75,6 +79,11 @@ journal:
   at: '2026-10-19T13:08:44.197239Z'
   stage: review
   run: 89a291fbaa80458aa14ccd8defaf2f98
+- number: 13
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:09:04.337954Z'
+  stage: docs
 ---
 
 # HTTP API
@@ -373,3 +382,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     Earlier tests:
     - `tests/service/test_todo_service.py`: standing leave to move a shared test helper. `T0` and `TickingClock` moved to `tests/fakes.py`, and every test keeps its name and what it checks.
     - `tests/domain/test_imports.py`: standing leave to move a shared test helper. `_imported_modules` moved to `tests/imports.py` as `imported_modules`, which now works out the package from `src/app`. For domain files it gives the same package as before, and the test keeps its name and what it checks.
+13. factory: started docs as opencode-demo.
