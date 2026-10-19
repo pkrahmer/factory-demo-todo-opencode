@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: smoke-test
-  started_at: '2026-10-19T14:14:16.556700Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -122,6 +118,12 @@ journal:
   kind: started
   at: '2026-10-19T14:14:16.556700Z'
   stage: smoke-test
+- number: 21
+  speaker: smoke-tester
+  kind: result
+  at: '2026-10-19T14:14:38.051939Z'
+  stage: smoke-test
+  run: aa6f381fabc44fa9991cf42812dd049e
 ---
 
 # Title search
@@ -379,3 +381,21 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
 
     `check`: check: green
 20. factory: started smoke-test as opencode-demo.
+21. smoke-tester: Smoke test, round 1. I ran the command under `## Smoke test` once from the repository root, exactly as written. I changed nothing. I did not run `make check`, because the factory runs the checks after this stage.
+
+    Command 1, the `uv run python -c "..."` script (three todos, a padded search, then a 201-character search):
+
+    ```
+    /work/checkout/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+      from starlette.testclient import TestClient as TestClient  # noqa
+    ['Buy Milk', 'MILK run']
+    422 ['detail']
+    ```
+
+    Met its `Expect:` line. It printed two lines, `['Buy Milk', 'MILK run']` and then `422 ['detail']`. The first two lines of output are a warning on stderr from the installed `fastapi`/`starlette` packages. The coder noted it in entries 7, 11 and 15. It existed before this story and is not part of the expected output.
+
+    Criteria cross-read: the output is consistent with criteria 1 and 2 (a stripped, case-insensitive match in creation order) and criterion 8 (the 201-character side gives 422 with `detail` as the only key). It contradicts no criterion. The command does not test case folding, the `done` combination or the 200-character side; they are covered by the tests named in entry 13.
+
+    Findings: none.
+
+    Open: none.
