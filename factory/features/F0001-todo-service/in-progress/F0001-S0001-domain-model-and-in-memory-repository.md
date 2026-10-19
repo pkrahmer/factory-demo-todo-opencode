@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: smoke-test
-  started_at: '2026-10-19T12:50:18.593385Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -78,6 +74,12 @@ journal:
   kind: started
   at: '2026-10-19T12:50:18.593385Z'
   stage: smoke-test
+- number: 13
+  speaker: smoke-tester
+  kind: result
+  at: '2026-10-19T12:50:38.648576Z'
+  stage: smoke-test
+  run: da3ad6b8720748afa94667fcdfc86ae3
 ---
 
 # Domain model and in-memory repository
@@ -349,3 +351,28 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
 
     `check`: check: green
 12. factory: started smoke-test as opencode-demo.
+13. smoke-tester: I ran both commands under `## Smoke test` from the repository root, exactly as written and in order. Neither starts a server. Both met their `Expect:` line, so there are no findings.
+
+    Command 1 (add `b` then `a`, mark `a` done, list all) exited with 0:
+
+    ```
+    True 'Buy milk' 2026-10-04T12:00:00+00:00
+    False 'Write the next story' 2026-10-04T12:01:00+00:00
+    ```
+
+    Met `Expect:`: two lines in creation order although `b` was added first, the title of `a` stripped from `'  Buy milk '` to `'Buy milk'`, the update to `done=True` kept, and UTC isoformat timestamps.
+
+    Command 2 (a blank title and a 201-character title through `Todo.new`) exited with 0:
+
+    ```
+    InvalidTitle - title must not be blank
+    InvalidTitle - title must be at most 200 characters
+    ```
+
+    Met `Expect:`: both exact lines, in order.
+
+    Checked against the acceptance criteria: the output agrees with criteria 1 (`new` gives an open todo with `created_at` equal to `now`), 3 (strip through `Todo.new`), 4 and 5 (the refused sides, with the exact messages), 9 (`with_done`), 14 (add then get, here through `list_all`), 15 is not exercised, 18 (oldest first whatever the add order) and 20 (`update` replaces the stored todo). No criterion is contradicted, including those the commands did not target.
+
+    I fixed nothing and changed no file. I did not run `make check` again: the factory runs the stage's checks itself, and the coder (journal 7) and documenter (journal 11) both reported it green.
+
+    Open: nothing.
