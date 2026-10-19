@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T12:53:33.013798Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -25,6 +29,11 @@ journal:
   at: '2026-10-19T12:53:13.179226Z'
   stage: intake
   run: 4b6869a3d8274f9f87875fe8b28582e2
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:53:33.013798Z'
+  stage: tests
 ---
 
 # Service layer with filtering
@@ -140,3 +149,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
      - Block 2: it prints `InvalidTitle`, `TodoNotFound` and `[]`, which can be checked line by line.
    - Architecture: the service depends on the `TodoRepository` protocol and the domain only, with no import of `app.repository` or `app.api`. The clock lives in the service, as the Description says. Tests go in `tests/service/` and use the in-memory repository, as `CLAUDE.md` asks. There are no new dependencies and no change to `factory/`.
    - Scope: this is the "service layer: create, get, list with a done filter, rename, complete, reopen, delete" item of `feature.md`, with no API and no storage change. Nothing is in "Out of scope". Feature decisions 5 and 17 are carried by criteria 9, 11 and 5.
+4. factory: started tests as opencode-demo.
