@@ -1,17 +1,13 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 6
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: intake
-  started_at: '2026-10-19T13:30:29.871178Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,12 @@ journal:
   kind: started
   at: '2026-10-19T13:30:29.871178Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-10-19T13:30:55.045991Z'
+  stage: intake
+  run: a14eb8c6760d40aca044472b95c164b0
 ---
 
 # Health endpoint
@@ -98,3 +100,17 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
 
 1. 2026-10-19 human: created.
 2. factory: started intake as opencode-demo.
+3. intake: accepted
+
+   - Interface: Concrete. It names the modules and signatures: `HealthRead` in `api/schemas.py`, `router` and `read_health` in the new `api/health.py`, `create_app(service, *, storage=...)` in `api/app.py`, and `build_app(environ)` plus `app = build_app(os.environ)` in `api/main.py`. The current `main.py` and `app.py` match the starting point the story describes. `build_repository` stays, so the existing tests in `tests/api/test_main.py` are unaffected and the story names no other story's test to change. The Interface also states `version` is `importlib.metadata.version("app")`; `pyproject.toml` has `name = "app"`, `version = "0.1.0"`.
+   - Criteria: Each one can be tested by a single test function, and the parametrized ones are laid out as rows.
+     - Criterion 1 covers the default `"memory"`, the exact body and the metadata version.
+     - Criterion 2 covers `storage="sqlite"`.
+     - Criterion 3 covers all three `build_app` rows: missing `TODO_DB`, empty `TODO_DB`, and a set path.
+     - Criterion 4 covers a repository that raises on every method.
+     - Criterion 5 covers the todo routes on both sides: the persistent repository is shared by a second app, and the in-memory one is not.
+     - Criteria 6 and 7 cover the OpenAPI paths, the `health` tag and the committed schema.
+     - Every Interface clause has a criterion: the version source, the `"memory"` default for callers that pass only the service, and `"sqlite"` only when `TODO_DB` is set and non-empty. The empty-string rejection is criterion 3's second row, and no input is refused, so there is no further failing side.
+   - Smoke test: Runnable as written, with `uv run python -c` against `build_app({})` through `TestClient`. The `Expect:` line gives one exact output, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`, which matches the current `pyproject.toml` version.
+   - Architecture: Fits the layers. `app.api` holds the router, schema and wiring, and `build_app` sits in the composition root, which is the only place that chooses the concrete repository. `/health` reads the storage kind from app state and never touches the service or repository. `HealthRead` is a Pydantic boundary model. No new dependency.
+   - Scope: Inside F0002's scope (`GET /health`: status, version, storage kind). It touches nothing in "Out of scope". Feature decisions 1, 6 and 7 are each covered by a criterion (4, 3, 5).
