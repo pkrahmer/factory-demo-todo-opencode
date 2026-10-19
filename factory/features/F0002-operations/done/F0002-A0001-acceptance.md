@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 0
 attempts: 0
@@ -20,8 +20,13 @@ journal:
   at: '2026-10-19T14:01:28.312515Z'
   stage: acceptance
   run: de1ab6c22c654f869404fad1fec153e8
+- number: 3
+  speaker: factory
+  kind: done
+  at: '2026-10-19T14:02:47.667818Z'
+  stage: done
 stories: [F0002-S0001, F0002-S0002, F0002-S0003]
-outcome: null
+outcome: accepted
 ---
 
 # Acceptance of Operations
@@ -202,3 +207,4 @@ I add no story for the red `make mutants`: F0001-S0005 is already in F0001's bac
    6. Decisions: the 9 in `feature.md` plus 7 from the stories, listed (`_storage_kind` as one rule, the `StorageKind` alias, health as liveness only, exact `--version` without argparse, open = len − done, the `/health` table row, stdout-only "one line"). The earlier tests changed were `api/test_imports.py`, `domain/test_imports.py`, `imports.py`, `api/test_health.py`, `api/test_openapi.py` and `fakes.py`, each under a named leave. None was changed without one.
    7. Slow checks: none beyond `make check` and `make mutants`. The slowest test takes 0.096 s (`test_build_app_hands_the_todo_routes_the_chosen_repository[sqlite]`). Disk used is unchanged since F0001's acceptance. Free fell by 0.1 GB on all mounts alike (the shared host volume).
    8. Cost: 22 runs, 11.0 min, $3.13. S0002 stands out with 10 runs and $1.29, from one tests-stage crash and one review round about a copied layer check (`belongs_to`). 0 questions answered, 0.0 h waited.
+3. factory: done (pull request merged); cost: 1 runs, 3.7 min, 27 turns, 84318 tokens in (1533936 more from cache), 16410 out, $1.06
