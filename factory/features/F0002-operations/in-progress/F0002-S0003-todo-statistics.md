@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: smoke-test
-  started_at: '2026-10-19T13:55:22.749225Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -78,6 +74,12 @@ journal:
   kind: started
   at: '2026-10-19T13:55:22.749225Z'
   stage: smoke-test
+- number: 13
+  speaker: smoke-tester
+  kind: result
+  at: '2026-10-19T13:55:46.317968Z'
+  stage: smoke-test
+  run: b9b54aca9a28440b9c99021bad9e9162
 ---
 
 # Todo statistics
@@ -241,3 +243,22 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
 
     `check`: check: green
 12. factory: started smoke-test as opencode-demo.
+13. smoke-tester: I ran the smoke test exactly as written from the repository root. It met its `Expect:` line, and nothing in it contradicts an acceptance criterion. I fixed nothing.
+
+    Command 1 (the `uv run python -c "..."` script under `## Smoke test`):
+
+    ```
+    /work/checkout/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+      from starlette.testclient import TestClient as TestClient  # noqa
+    {'open': 2, 'done': 1, 'total': 3}
+    ```
+
+    Exit status 0. Expect met: stdout is one line, `{'open': 2, 'done': 1, 'total': 3}`. The two lines above it are a deprecation warning on stderr. The warning was there before this work, the coder (entry 7) and the documenter (entry 11) both noted it, and it is outside this work item.
+
+    Criteria cross-check:
+    - The output agrees with criterion 2 (two open, one done, total 3) and with the mixed row of criterion 6.
+    - `/stats` answered on `build_app({})`, so `create_app` includes the stats router.
+    - `docs/api.md` has the `GET /stats` row in its endpoint table, a "Stats" section with the three fields, and a curl example (criterion 10).
+    - I did not run `make check` (criterion 9); the factory runs it as this stage's check.
+
+    No findings. Nothing is open.
