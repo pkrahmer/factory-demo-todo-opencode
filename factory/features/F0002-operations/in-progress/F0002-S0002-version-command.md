@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T13:39:03.810577Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -25,6 +29,11 @@ journal:
   at: '2026-10-19T13:38:43.690691Z'
   stage: intake
   run: 63fc321dfb3c481f9390f7304eae1302
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:39:03.810577Z'
+  stage: tests
 ---
 
 # Version command
@@ -91,3 +100,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
    - Architecture: `app.__main__` is a module outside the layers and is tested at the `tests/` root, as `CLAUDE.md` says. It needs nothing from `app.domain`, `app.service`, `app.repository` or `app.api`, and the story says so. It is wired by hand without a new dependency (`argparse` is not required), and it adds no new top-level package. The existing `tests/imports.py` helper is available for criterion 4. The docs criterion targets the README's *Getting started* section, which exists.
    - Scope: this is the feature's Scope item `python -m app --version` and is not in its Out of scope. It matches the feature's decisions 2, 5 and 8 (usage error for any other argument, exact `--version` only, child-process test).
    No questions. No story edits.
+4. factory: started tests as opencode-demo.
