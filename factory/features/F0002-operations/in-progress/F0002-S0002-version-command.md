@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T13:46:21.211032Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -110,6 +106,12 @@ journal:
   kind: started
   at: '2026-10-19T13:46:21.211032Z'
   stage: review
+- number: 19
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T13:46:40.160179Z'
+  stage: review
+  run: c5740499d55a4233bcffe639b026418e
 ---
 
 # Version command
@@ -283,3 +285,21 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 7 dead code, in .reports/
 18. factory: started review as opencode-demo.
+19. reviewer: no findings
+
+    What I checked:
+    - **Acceptance criteria:** each of criteria 1 to 5 has a test in `tests/test_main.py`, and each test checks what its criterion says.
+      - Criteria 1, 2 and 5 check the exact stdout and stderr text, including the newline, and the return or exit code.
+      - Criterion 2's four argument lists are rows of one parametrized test, and so are the two cases of criterion 3 and the two of criterion 5.
+      - Criterion 4 names only the layers `app.__main__` must not import.
+      - The usage-error rule is tested for every case the Interface names: no arguments, `--help`, an unknown argument, and an extra argument after `--version`.
+      - The coder's entry 17 reports `make check` green, 165 passed.
+    - **Architecture:** `src/app/__main__.py` imports only `sys` and `importlib.metadata`. It adds no new package or dependency, and the layers are untouched.
+    - **Security:** no secrets, no shell command built from strings (the child process gets a list of arguments), no marker that silences a check.
+    - **Quality:** the names say what things are and there is no dead code. The module docstring is there, which is all `CLAUDE.md` asks of `__main__`. The shared helper `belongs_to` in `tests/imports.py` removed the copied layer check from round 0. In `tests/domain/test_imports.py`, the check that a module lies outside `app.domain` means the same as it did before.
+    - **Work item:** the Description matches what was built. The journal explains why the coder rejected `argparse`. The docs criterion still says what the README's *Getting started* section must show.
+
+    Earlier tests:
+    - `tests/api/test_imports.py`: changed under the standing leave to move a shared test helper. `_is_repository` now calls `belongs_to`; `test_only_main_imports_the_repository_layer` keeps its name and checks the same thing.
+    - `tests/domain/test_imports.py`: changed under the standing leave to move a shared test helper. `_is_forbidden` now calls `belongs_to`; `test_domain_imports_no_framework_and_no_outer_layer` keeps its name and checks the same thing.
+    - `tests/imports.py`: no leave needed. The change only adds `belongs_to` and leaves the existing helpers as they were.
