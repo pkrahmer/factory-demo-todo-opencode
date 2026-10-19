@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T12:44:54.661724Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -25,6 +29,11 @@ journal:
   at: '2026-10-19T12:44:34.306199Z'
   stage: intake
   run: ac53c480166942b88ebb3851974476ac
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:44:54.661724Z'
+  stage: tests
 ---
 
 # Domain model and in-memory repository
@@ -194,3 +203,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
      - The existing import-linter layers contract already covers these layers.
      - `docs/project-guide.md` does not exist yet; criterion 25 has the documenter create it. The README already has a *Where to look next* section to extend.
    - Scope: it stays inside feature scope (entity, title rule, timestamps, errors, protocol, in-memory repository). It stays out of the SQLite repository (S0004), the service (S0002) and the API (S0003). It changes no other story's tests. It is consistent with feature decisions 1–4 and 15.
+4. factory: started tests as opencode-demo.
