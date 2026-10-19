@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T14:08:59.009091Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -78,6 +74,12 @@ journal:
   kind: started
   at: '2026-10-19T14:08:59.009091Z'
   stage: tests
+- number: 13
+  speaker: tester
+  kind: result
+  at: '2026-10-19T14:10:43.869601Z'
+  stage: tests
+  run: 62cb45d6c95c491e9a25fdc40dae2301
 ---
 
 # Title search
@@ -231,3 +233,46 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
 
     Noticed, not touched: as in round 0, pytest's `StarletteDeprecationWarning` from `fastapi.testclient`, which comes from the installed dependencies. Criterion 12 (docs) is the documenter's.
 12. factory: started tests as opencode-demo.
+13. tester: Round 1. The coder's entry 11 asked for three fixture moves, which close the reviewer's findings 1–3. I made all three under the standing leave in CLAUDE.md (*Tests*). I changed no source code, and every test keeps its name and checks the same thing.
+
+    What I moved into `tests/conftest.py`, each with a docstring:
+    - `ticking_service`: a `TodoService` over an empty `InMemoryTodoRepository` with a `TickingClock`.
+    - `client`: a `TestClient` of `create_app(ticking_service)`.
+    - `three_todos`: creates `Buy Milk`, `MILK run` and `Call mum` and returns the created todos.
+    - `milk_done_and_open`: creates `Buy Milk` (done) and `MILK run` (open).
+
+    Main decision: I named the shared service fixture `ticking_service`, not `service`. `tests/service/test_todo_service.py` keeps its own `service` fixture with a fixed clock (`T0`), which a shared `service` would have hidden. So the API tests now ask for `ticking_service` by that name.
+
+    Rejected alternatives:
+    - A shared fixture named `service`: it would have meant renaming the fixed-clock fixture in about 17 tests.
+    - A `three_ids` fixture next to `three_todos`: the API tests now take the ids from `three_todos`.
+
+    Earlier test files I changed, all under the standing leave:
+    - `tests/api/test_todos.py`: removed its copies of `service` and `client`. `test_routes_use_the_service_given_to_create_app` and `test_the_api_is_called_todo_service` now take `ticking_service`. Removed the imports that are no longer used.
+    - `tests/api/test_stats.py`: removed its copy of `service`. `test_get_stats_returns_the_counts` now takes `ticking_service`. Removed the imports that are no longer used.
+    - `tests/service/test_todo_service.py`: removed its copy of `ticking_service`, so its tests use the shared one. Its fixed-clock `service` stays, and so does the `T0` import; the `TickingClock` import is gone.
+
+    Not moved: the `service` fixture in `tests/api/test_health.py`. It uses the default clock, not a `TickingClock`, so it is not a copy of the shared fixture.
+
+    New test files, rewritten to use the shared fixtures:
+    - `tests/service/test_search.py`: no local fixtures left.
+    - `tests/api/test_search.py`: no local fixtures left. The id comparisons are now built from `three_todos`.
+
+    Criterion → test (unchanged from entry 5):
+    - criterion 1: tests/service/test_search.py::test_search_returns_the_todos_whose_title_contains_the_text_in_creation_order
+    - criterion 2: tests/service/test_search.py::test_search_text_is_stripped
+    - criterion 3: tests/service/test_search.py::test_no_or_blank_search_means_no_title_filter (rows none, empty, spaces)
+    - criterion 4: tests/service/test_search.py::test_search_uses_case_folding
+    - criterion 5: tests/service/test_search.py::test_search_combines_with_the_done_filter (rows open, done)
+    - criterion 6: tests/api/test_search.py::test_search_returns_the_matching_todos_in_creation_order
+    - criterion 7: tests/api/test_search.py::test_search_combines_with_the_done_filter
+    - criterion 8: tests/api/test_search.py::test_search_length_is_limited_on_the_text_as_sent (rows 200-chars, 201-chars, 201-chars-padded)
+    - criterion 9: tests/api/test_search.py::test_list_without_parameters_returns_every_todo
+    - criterion 10: existing tests/api/test_openapi.py::test_committed_schema_matches_the_app, unchanged
+
+    Files created this round: none; the files changed are listed above. Modules not importable: none.
+
+    `make lint` is green and `make test` passes 187 tests, the same count as in round 0. I skipped the type check, as this stage says to.
+
+    `lint`: lint: green (0.0 s)
+    `test`: test: green (5.7 s)

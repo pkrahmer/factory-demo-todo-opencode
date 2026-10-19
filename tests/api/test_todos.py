@@ -21,16 +21,6 @@ ID_ROUTES = [
 ]
 
 
-@pytest.fixture
-def service() -> TodoService:
-    return TodoService(InMemoryTodoRepository(), clock=TickingClock())
-
-
-@pytest.fixture
-def client(service: TodoService) -> TestClient:
-    return TestClient(create_app(service))
-
-
 def _create(client: TestClient, title: str = "Buy milk") -> dict[str, Any]:
     response = client.post("/todos", json={"title": title})
     assert response.status_code == 201
@@ -251,9 +241,9 @@ def test_an_unknown_id_is_not_found(
 
 
 def test_routes_use_the_service_given_to_create_app(
-    client: TestClient, service: TodoService
+    client: TestClient, ticking_service: TodoService
 ) -> None:
-    todo = service.create("Buy milk")
+    todo = ticking_service.create("Buy milk")
 
     response = client.get("/todos")
 
@@ -261,8 +251,8 @@ def test_routes_use_the_service_given_to_create_app(
     assert [item["id"] for item in response.json()] == [str(todo.id)]
 
 
-def test_the_api_is_called_todo_service(service: TodoService) -> None:
-    app = create_app(service)
+def test_the_api_is_called_todo_service(ticking_service: TodoService) -> None:
+    app = create_app(ticking_service)
 
     assert app.openapi()["info"]["title"] == "Todo service"
 

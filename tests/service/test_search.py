@@ -3,37 +3,18 @@
 import pytest
 
 from app.domain.model import Todo
-from app.repository.memory import InMemoryTodoRepository
 from app.service.todo_service import TodoService
-from tests.fakes import TickingClock
-
-
-@pytest.fixture
-def service() -> TodoService:
-    return TodoService(InMemoryTodoRepository(), clock=TickingClock())
-
-
-@pytest.fixture
-def three_todos(service: TodoService) -> list[Todo]:
-    return [service.create(title) for title in ("Buy Milk", "MILK run", "Call mum")]
-
-
-@pytest.fixture
-def milk_done_and_open(service: TodoService) -> None:
-    bought = service.create("Buy Milk")
-    service.create("MILK run")
-    service.complete(bought.id)
 
 
 def test_search_returns_the_todos_whose_title_contains_the_text_in_creation_order(
-    service: TodoService, three_todos: list[Todo]
+    ticking_service: TodoService, three_todos: list[Todo]
 ) -> None:
-    assert service.list(search="milk") == three_todos[:2]
+    assert ticking_service.list(search="milk") == three_todos[:2]
 
 
 @pytest.mark.usefixtures("three_todos")
-def test_search_text_is_stripped(service: TodoService) -> None:
-    assert service.list(search="  milk ") == service.list(search="milk")
+def test_search_text_is_stripped(ticking_service: TodoService) -> None:
+    assert ticking_service.list(search="  milk ") == ticking_service.list(search="milk")
 
 
 @pytest.mark.usefixtures("three_todos")
@@ -45,14 +26,16 @@ def test_search_text_is_stripped(service: TodoService) -> None:
         pytest.param("   ", id="spaces"),
     ],
 )
-def test_no_or_blank_search_means_no_title_filter(service: TodoService, search: str | None) -> None:
-    assert service.list(search=search) == service.list()
+def test_no_or_blank_search_means_no_title_filter(
+    ticking_service: TodoService, search: str | None
+) -> None:
+    assert ticking_service.list(search=search) == ticking_service.list()
 
 
-def test_search_uses_case_folding(service: TodoService) -> None:
-    todo = service.create("Straße")
+def test_search_uses_case_folding(ticking_service: TodoService) -> None:
+    todo = ticking_service.create("Straße")
 
-    assert service.list(search="STRASSE") == [todo]
+    assert ticking_service.list(search="STRASSE") == [todo]
 
 
 @pytest.mark.parametrize(
@@ -64,8 +47,8 @@ def test_search_uses_case_folding(service: TodoService) -> None:
 )
 @pytest.mark.usefixtures("milk_done_and_open")
 def test_search_combines_with_the_done_filter(
-    service: TodoService, done: bool, expected_titles: list[str]
+    ticking_service: TodoService, done: bool, expected_titles: list[str]
 ) -> None:
-    listed = service.list(done=done, search="milk")
+    listed = ticking_service.list(done=done, search="milk")
 
     assert [todo.title for todo in listed] == expected_titles

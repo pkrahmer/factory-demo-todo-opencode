@@ -9,7 +9,7 @@ import pytest
 from app.domain.errors import InvalidTitle, TodoNotFound
 from app.repository.memory import InMemoryTodoRepository
 from app.service.todo_service import TodoService, utc_now
-from tests.fakes import T0, TickingClock
+from tests.fakes import T0
 
 UNKNOWN_ID = UUID(int=42)
 BLANK_TITLES = [pytest.param("", id="empty"), pytest.param("   ", id="spaces")]
@@ -18,11 +18,6 @@ BLANK_TITLES = [pytest.param("", id="empty"), pytest.param("   ", id="spaces")]
 @pytest.fixture
 def service() -> TodoService:
     return TodoService(InMemoryTodoRepository(), clock=lambda: T0)
-
-
-@pytest.fixture
-def ticking_service() -> TodoService:
-    return TodoService(InMemoryTodoRepository(), clock=TickingClock())
 
 
 def _assert_utc_close_to_now(moment: datetime) -> None:
