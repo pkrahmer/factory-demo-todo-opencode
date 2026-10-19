@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: review
+  started_at: '2026-10-19T13:46:21.211032Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -101,6 +105,11 @@ journal:
   at: '2026-10-19T13:46:00.526411Z'
   stage: doing
   run: cfc3517bc8224b5eaf7169c27d4764b3
+- number: 18
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:46:21.211032Z'
+  stage: review
 ---
 
 # Version command
@@ -273,3 +282,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
 
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 7 dead code, in .reports/
+18. factory: started review as opencode-demo.
