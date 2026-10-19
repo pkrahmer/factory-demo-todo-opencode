@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: review
+  started_at: '2026-10-19T14:07:30.096430Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -47,6 +51,11 @@ journal:
   at: '2026-10-19T14:07:09.411828Z'
   stage: doing
   run: d1f4508ce98e4471a9971e1d03d539fe
+- number: 8
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:07:30.096430Z'
+  stage: review
 ---
 
 # Title search
@@ -168,3 +177,4 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
 
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/
+8. factory: started review as opencode-demo.
