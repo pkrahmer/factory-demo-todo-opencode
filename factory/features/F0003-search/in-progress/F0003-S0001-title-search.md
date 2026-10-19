@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T14:08:59.009091Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -69,6 +73,11 @@ journal:
   at: '2026-10-19T14:08:38.516623Z'
   stage: doing
   run: d7d61a9b134b4e499d9997dfe4d9152f
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:08:59.009091Z'
+  stage: tests
 ---
 
 # Title search
@@ -221,3 +230,4 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
     Description: unchanged. The journal changed no meaning of the task.
 
     Noticed, not touched: as in round 0, pytest's `StarletteDeprecationWarning` from `fastapi.testclient`, which comes from the installed dependencies. Criterion 12 (docs) is the documenter's.
+12. factory: started tests as opencode-demo.
