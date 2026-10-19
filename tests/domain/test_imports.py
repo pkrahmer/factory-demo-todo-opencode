@@ -1,6 +1,6 @@
 """The domain stays free of frameworks and of the outer layers."""
 
-from tests.imports import APP_DIR, imported_modules
+from tests.imports import APP_DIR, belongs_to, imported_modules
 
 DOMAIN_DIR = APP_DIR / "domain"
 FORBIDDEN_FRAMEWORKS = {"fastapi", "pydantic", "sqlalchemy"}
@@ -10,7 +10,7 @@ def _is_forbidden(module: str) -> bool:
     top = module.split(".", maxsplit=1)[0]
     if top in FORBIDDEN_FRAMEWORKS:
         return True
-    outside_domain = module != "app.domain" and not module.startswith("app.domain.")
+    outside_domain = not belongs_to(module, "app.domain")
     return top == "app" and module != "app" and outside_domain
 
 

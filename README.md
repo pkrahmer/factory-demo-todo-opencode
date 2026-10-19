@@ -9,6 +9,14 @@ uv sync       # install
 make check    # everything the pipeline checks: lint, types, layers, static analysis, secrets, licences, tests
 ```
 
+Check which version is installed, without starting the server:
+
+```bash
+uv run python -m app --version    # prints: app 0.1.0
+```
+
+Any other argument (or none) prints `usage: python -m app --version` to stderr and exits 2.
+
 Start the server with the todos in a SQLite file, created on first start, so that they survive a restart:
 
 ```bash

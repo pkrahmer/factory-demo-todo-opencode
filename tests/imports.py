@@ -25,3 +25,8 @@ def imported_modules(path: Path) -> list[str]:
             modules.append(base)
             modules.extend(f"{base}.{alias.name}" for alias in node.names)
     return modules
+
+
+def belongs_to(module: str, package: str) -> bool:
+    """Return whether `module` is `package` itself or one of its submodules."""
+    return module == package or module.startswith(f"{package}.")
