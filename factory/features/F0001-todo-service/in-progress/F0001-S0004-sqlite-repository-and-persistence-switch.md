@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T13:13:16.622475Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -25,6 +29,11 @@ journal:
   at: '2026-10-19T13:12:56.688256Z'
   stage: intake
   run: e71ef93ad74949288816f2c68857078c
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:13:16.622475Z'
+  stage: tests
 ---
 
 # SQLite repository and persistence switch
@@ -111,3 +120,4 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
      - Wiring stays in `app.api.main`, the only `app.api` module that imports `app.repository`. Criterion 13 holds that through the existing `tests/api/test_imports.py`.
      - `app.domain` and `app.service` are untouched.
    - Scope: it is within feature F0001. The scope lists the SQLite repository behind the same protocol, the contract suite and the persistence switch, and decisions 8, 14, 15 and 16 of `feature.md` are all reflected in the criteria. Nothing in "Out of scope" is touched.
+4. factory: started tests as opencode-demo.
