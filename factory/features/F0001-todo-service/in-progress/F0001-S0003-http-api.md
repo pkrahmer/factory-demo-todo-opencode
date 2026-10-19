@@ -1,17 +1,13 @@
 ---
 stage: intake
-blocked: null
+blocked: question
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 3
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: intake
-  started_at: '2026-10-19T12:59:41.193394Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,13 @@ journal:
   kind: started
   at: '2026-10-19T12:59:41.193394Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: question
+  at: '2026-10-19T13:00:19.998564Z'
+  stage: intake
+  run: f831c085e6a34ab980e3c780876fcaf0
+  blocked: question
 ---
 
 # HTTP API
@@ -152,3 +155,33 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
 
 1. 2026-10-19 human: created.
 2. factory: started intake as opencode-demo.
+3. intake: Intake stopped with one question; everything else checked out.
+
+   1. The Interface says the domain's title rule applies "after stripping", and the schemas put no length or blank rule on `title`. On `POST /todos` that has no criterion for the passing side.
+      - The padded title `"  Buy milk "` appears only in the smoke test. Criterion 1 uses an unpadded title.
+      - Criterion 3 tests 200 and 201 characters, but not a 200-character title padded with whitespace.
+      - A coder who puts `max_length=200` or `strip_whitespace` on `TodoCreate.title` would pass every criterion. Criterion 3 would also pass if the schema checked the length before stripping.
+      - Criterion 11 covers stripping for `PATCH` only.
+
+      Options:
+      - (a) Add a criterion before the two closing ones: `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`.
+      - (b) Add a row to criterion 3's parametrized test: a title of 200 characters plus surrounding spaces returns 201.
+      - (c) Do both.
+
+      I would choose (c).
+
+   Checks that passed:
+   - Interface: concrete modules and signatures. `make openapi` exists in the Makefile, and `docs/openapi.json` is in the coder's write paths.
+   - Criteria: each is testable by one test function. The rules with a failing side are covered:
+     - blank title: criterion 2.
+     - 201-character title: criterion 3.
+     - missing field: criterion 4.
+     - bad `done` query value: criterion 7.
+     - bad id: criterion 9.
+     - empty or null `PATCH` body: criterion 12.
+     - `PATCH` with an invalid title changing nothing: criterion 13.
+     - unknown id: criterion 16.
+     - `PATCH` order (title first, then done): criteria 13 and 14.
+   - Smoke test: runnable, port 8765. Its `Expect:` line gives five checkable lines that match the five commands that print.
+   - Architecture: layers are respected. Only `main` wires the repository, and criterion 23 tests that. The errors map in one place, and the boundaries are Pydantic models.
+   - Scope: inside the feature's scope (HTTP API, one error shape, committed OpenAPI) and not in its "Out of scope".
