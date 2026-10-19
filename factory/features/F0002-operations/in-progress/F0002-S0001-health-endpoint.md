@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T13:33:47.251713Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -56,6 +52,12 @@ journal:
   kind: started
   at: '2026-10-19T13:33:47.251713Z'
   stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T13:34:17.395260Z'
+  stage: review
+  run: 799b970a22b4498c981dd75653f14cc3
 ---
 
 # Health endpoint
@@ -181,3 +183,22 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 7 dead code, in .reports/
 8. factory: started review as opencode-demo.
+9. reviewer: no findings
+
+   I read the work item and `git diff main...HEAD -- . ':!factory'`. I did not read the generated `docs/openapi.json` diff; whether it is current is covered by criterion 7's existing test and the green `make check` in entry 7.
+
+   - **Acceptance criteria:** Criteria 1 to 6 each have a test in `tests/api/test_health.py`, and each test checks what its criterion says.
+     - Criterion 1 checks the exact body, with the version taken from `importlib.metadata.version("app")`.
+     - Criterion 2 checks that `storage="sqlite"` is reported.
+     - Criterion 3 has the three rows: `TODO_DB` missing, empty and set.
+     - Criterion 4 uses `RaisingRepository` with `raise_server_exceptions=False`, so any use of the repository would turn the 200 into a 500.
+     - Criterion 5 has two rows: SQLite shared with a second app, and memory not shared.
+     - Criterion 6 checks the `health` tag and that the `/todos` paths are still there.
+     - Criterion 7 is the existing test in `tests/api/test_openapi.py`.
+     - The Interface refuses no input, so there is no failing side left untested. The empty `TODO_DB` boundary is criterion 3's second row.
+   - **Architecture:** `health.py` reads only `app.state.storage` and never calls the service or the repository. The concrete repository is still chosen only in `app.api.main`. `HealthRead` is a Pydantic model at the boundary. `app.state.storage` is untyped, but it is assigned to a variable typed `StorageKind` and Pydantic validates it straight away in `HealthRead`.
+   - **Security:** No markers that silence a check, no secrets, no strings built into shell or SQL.
+   - **Quality:** The coder's alias `StorageKind` in `schemas.py` means the same as the Literal spelled out in the Interface, and it keeps the two kinds in one place. The private `_storage_kind` in `main.py` holds the "`TODO_DB` set and not empty means SQLite" rule once, for both `build_repository` and `build_app`. The `service` fixture in `test_health.py` is not a copy: the fixtures in `test_todos.py` and `test_todo_service.py` use other clocks. No existing helper in `tests/fakes.py` or `tests/conftest.py` was copied; the shared `db_path` fixture is reused.
+   - **Work item hygiene:** Entry 7 gives the main decision and what was rejected. The Description matches what was built, and the docs criterion still says what a reader needs to know.
+
+   Earlier tests: none. The diff only adds `tests/api/test_health.py` and changes no test file that `main` already holds.
