@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T13:32:30.433763Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -36,6 +40,11 @@ journal:
   at: '2026-10-19T13:32:09.035758Z'
   stage: tests
   run: f07992d8a1b64bc0941a99afab3c6740
+- number: 6
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:32:30.433763Z'
+  stage: doing
 ---
 
 # Health endpoint
@@ -143,3 +152,4 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
 
    `lint`: lint: green (0.0 s)
    `test`: 146 passed, 20 warnings, 1 error in 3.72s
+6. factory: started doing as opencode-demo.
