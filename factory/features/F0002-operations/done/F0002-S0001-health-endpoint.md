@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 0
 attempts: 0
@@ -80,6 +80,11 @@ journal:
   at: '2026-10-19T13:36:12.538685Z'
   stage: smoke-test
   run: 8944aea089a147bca2ba6fdd196048d9
+- number: 14
+  speaker: factory
+  kind: done
+  at: '2026-10-19T13:37:31.582511Z'
+  stage: approval
 ---
 
 # Health endpoint
@@ -265,3 +270,4 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
     - The smoke test does not exercise the other criteria (2 and 4 to 9).
 
     Findings: none.
+14. factory: done (pull request merged); cost: 6 runs, 3.3 min, 29 turns, 141777 tokens in (440781 more from cache), 15671 out, $0.89
