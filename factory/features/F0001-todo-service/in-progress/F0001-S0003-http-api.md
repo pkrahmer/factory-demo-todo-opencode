@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: smoke-test
-  started_at: '2026-10-19T13:10:27.645861Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -95,6 +91,12 @@ journal:
   kind: started
   at: '2026-10-19T13:10:27.645861Z'
   stage: smoke-test
+- number: 16
+  speaker: smoke-tester
+  kind: result
+  at: '2026-10-19T13:10:51.528332Z'
+  stage: smoke-test
+  run: c99f47ea92ba4da28cb347c48e6c2d00
 ---
 
 # HTTP API
@@ -422,3 +424,30 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
 
     `check`: check: green
 15. factory: started smoke-test as opencode-demo.
+16. smoke-tester: Ran the smoke test from the repository root as written, in one shell, with one diagnostic `echo "ID=$ID"` at the end to confirm the id in the last line. The trap stopped uvicorn and removed the temporary folder; port 8765 answered nothing afterwards. I changed no files.
+
+    Output:
+
+    ```
+    {"id":"7a074302-92df-4543-9561-05d2eb8687c6","title":"Buy milk","done":true,"created_at":"2026-10-19T13:10:39.867113Z"}
+    []
+    {"detail":"title must not be blank"}
+    204
+    {"detail":"todo 7a074302-92df-4543-9561-05d2eb8687c6 not found"}
+    ID=7a074302-92df-4543-9561-05d2eb8687c6
+    ```
+
+    Judgement, command by command:
+    - Server start and readiness loop: no output, as expected. The server answered, because every later call got a response.
+    - `POST /todos` with `"  Buy milk "` (captures `ID`): no output of its own. It returned an id, which the later lines use.
+    - `PATCH` with `{"done":true}`: met. The todo came back as JSON with `"title":"Buy milk"`, so the padding was stripped (criterion 24), and with `"done":true`. Keys are `id`, `title`, `done`, `created_at`, with a UTC `Z` timestamp (criterion 1).
+    - `GET /todos?done=false`: met, `[]` (criterion 6).
+    - `POST /todos` with `"   "`: met, `{"detail":"title must not be blank"}` (criteria 2 and 20).
+    - `DELETE /todos/$ID`: met, `204` (criterion 15).
+    - `GET /todos/$ID`: met, `{"detail":"todo <the same id> not found"}` with the hyphenated id (criteria 15 and 16).
+
+    I read the acceptance criteria again. Nothing in the run contradicts any of them, including criteria the commands did not target.
+
+    Findings: none.
+
+    Open: nothing.
