@@ -1,3 +1,30 @@
+---
+stage: intake
+blocked: null
+round: 0
+attempts: 0
+crashes: 0
+pull_request: null
+comments_read: []
+handed_over: null
+claim:
+  instance: opencode-demo
+  stage: intake
+  started_at: '2026-10-19T12:44:07.150760Z'
+  lease_duration: 60
+journal:
+- number: 1
+  speaker: human
+  kind: created
+  at: '2026-10-19T12:44:07.136469Z'
+  stage: intake
+- number: 2
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:44:07.150760Z'
+  stage: intake
+---
+
 # Domain model and in-memory repository
 
 ## Description
@@ -130,3 +157,6 @@ for title in ('   ', 'x' * 201):
 Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle - title must be at most 200 characters`.
 
 ## Journal
+
+1. 2026-10-19 human: created.
+2. factory: started intake as opencode-demo.
