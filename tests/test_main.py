@@ -7,7 +7,7 @@ from importlib.metadata import version
 import pytest
 
 from app.__main__ import main
-from tests.imports import APP_DIR, imported_modules
+from tests.imports import APP_DIR, belongs_to, imported_modules
 
 USAGE = "usage: python -m app --version\n"
 VERSION_LINE = f"app {version('app')}\n"
@@ -54,7 +54,7 @@ def test_entry_point_imports_no_layer() -> None:
     offenders = {
         module
         for module in imported_modules(APP_DIR / "__main__.py")
-        if any(module == layer or module.startswith(f"{layer}.") for layer in FORBIDDEN_LAYERS)
+        if any(belongs_to(module, layer) for layer in FORBIDDEN_LAYERS)
     }
 
     assert offenders == set()

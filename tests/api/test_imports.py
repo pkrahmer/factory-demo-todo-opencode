@@ -1,12 +1,12 @@
 """Only the composition root of the API chooses the concrete repository."""
 
-from tests.imports import APP_DIR, imported_modules
+from tests.imports import APP_DIR, belongs_to, imported_modules
 
 API_DIR = APP_DIR / "api"
 
 
 def _is_repository(module: str) -> bool:
-    return module == "app.repository" or module.startswith("app.repository.")
+    return belongs_to(module, "app.repository")
 
 
 def test_only_main_imports_the_repository_layer() -> None:

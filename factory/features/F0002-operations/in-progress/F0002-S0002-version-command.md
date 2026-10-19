@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T13:44:04.823884Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -88,6 +84,12 @@ journal:
   kind: started
   at: '2026-10-19T13:44:04.823884Z'
   stage: tests
+- number: 15
+  speaker: tester
+  kind: result
+  at: '2026-10-19T13:44:51.989267Z'
+  stage: tests
+  run: c38a0d3ec2fb413aa445fd1fe050cf42
 ---
 
 # Version command
@@ -218,3 +220,21 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
 
     Noticed, not touched: the docs criterion (the README's *Getting started* section) is the documenter's.
 14. factory: started tests as opencode-demo.
+15. tester: I made the test change from the coder's entry 13. It answers the review finding in entry 11, under the standing leave in `CLAUDE.md` to move a shared test helper, so it did not need the human's word.
+
+    - Added `belongs_to(module: str, package: str) -> bool` to `tests/imports.py`. It returns `module == package or module.startswith(f"{package}.")`.
+    - `tests/test_main.py::test_entry_point_imports_no_layer` now uses `belongs_to` in place of the inline check.
+    - Earlier test file changed: `tests/api/test_imports.py`. `_is_repository` now returns `belongs_to(module, "app.repository")`. `test_only_main_imports_the_repository_layer` keeps its name and checks the same thing.
+    - Earlier test file changed: `tests/domain/test_imports.py`. In `_is_forbidden`, `outside_domain` is now `not belongs_to(module, "app.domain")`. `test_domain_imports_no_framework_and_no_outer_layer` keeps its name and checks the same thing.
+
+    The criterion-to-test mapping is unchanged from entry 7:
+    - criterion 1: tests/test_main.py::test_version_flag_prints_the_installed_version
+    - criterion 2: tests/test_main.py::test_any_other_arguments_are_a_usage_error
+    - criterion 3: tests/test_main.py::test_main_without_argument_reads_sys_argv
+    - criterion 4: tests/test_main.py::test_entry_point_imports_no_layer
+    - criterion 5: tests/test_main.py::test_running_the_module_as_a_child_process
+
+    I created no files. No module failed to import, because `app.__main__` exists now. `make test`: 165 passed. `make lint`: green.
+
+    `lint`: lint: green (0.0 s)
+    `test`: test: green (7.2 s)
