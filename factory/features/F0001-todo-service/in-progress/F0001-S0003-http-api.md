@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T13:08:10.152509Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -73,6 +69,12 @@ journal:
   kind: started
   at: '2026-10-19T13:08:10.152509Z'
   stage: review
+- number: 12
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T13:08:44.197239Z'
+  stage: review
+  run: 89a291fbaa80458aa14ccd8defaf2f98
 ---
 
 # HTTP API
@@ -336,3 +338,38 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
 11. factory: started review as opencode-demo.
+12. reviewer: no findings
+
+    I read the story and the diff `git diff main...HEAD -- . ':!factory'`. I did not open `docs/openapi.json` by hand, because criterion 21's test checks that it is current.
+
+    What I checked:
+    - **Acceptance criteria:**
+      - Each of criteria 1–24 has a test in `tests/api/test_todos.py`, `tests/api/test_openapi.py` or `tests/api/test_imports.py`. Each test checks the criterion it is named after.
+      - The title length limit is tested on both sides as rows of one parametrized test: 200 characters, 201 characters, and 200 characters with surrounding spaces.
+      - Every failing side the Interface states has a test:
+        - blank title (criteria 2 and 13)
+        - missing field (4)
+        - bad `done` query value (7)
+        - id that is not a UUID (9)
+        - `PATCH` body that sets nothing, or only `null`s (12)
+        - unknown id (16)
+      - The coder's entry 10 records `check: green`.
+    - **Architecture:**
+      - Only `app.api.main` imports `app.repository`.
+      - `routes.py` takes the service through `Service`, and `get_service` reads it from `app.state`.
+      - Errors become status codes in one place, `errors.py`, through one table.
+      - The edge uses Pydantic schemas, and the API imports only the service and the domain.
+    - **Security:** I saw no secrets and no marker that silences a check. Error bodies carry only the domain's message or the first validation error's location and message.
+    - **Quality:**
+      - Names are clear, and each function does one thing.
+      - Comments explain why: in `routes.py` (rename first) and in `errors.py` (one sentence instead of FastAPI's list).
+      - `app.api` modules carry module docstrings, which is all `CLAUDE.md` asks of that layer.
+      - The shared helpers `tests/fakes.py` and `tests/imports.py` are moves, not second copies.
+    - **Work item hygiene:**
+      - The journal gives the main decision (typed handlers registered with `app.exception_handler`) and what was rejected (`add_exception_handler` with `Exception` handlers).
+      - The Description matches what was built.
+      - The docs criterion, 26, still says what the reader needs to know.
+
+    Earlier tests:
+    - `tests/service/test_todo_service.py`: standing leave to move a shared test helper. `T0` and `TickingClock` moved to `tests/fakes.py`, and every test keeps its name and what it checks.
+    - `tests/domain/test_imports.py`: standing leave to move a shared test helper. `_imported_modules` moved to `tests/imports.py` as `imported_modules`, which now works out the package from `src/app`. For domain files it gives the same package as before, and the test keeps its name and what it checks.
