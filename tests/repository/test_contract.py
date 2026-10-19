@@ -1,9 +1,8 @@
 """The repository contract, run against every repository behind the protocol."""
 
 from collections.abc import Callable
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
-from uuid import UUID
 
 import pytest
 
@@ -11,6 +10,8 @@ from app.domain.errors import DuplicateTodo, TodoNotFound
 from app.domain.model import Todo
 from app.domain.repository import TodoRepository
 from app.repository.memory import InMemoryTodoRepository
+from app.repository.sqlite import SqliteTodoRepository
+from tests.fakes import T0, make_todo
 
 RepositoryFactory = Callable[[Path], TodoRepository]
 
@@ -19,22 +20,18 @@ def _in_memory(_: Path) -> TodoRepository:
     return InMemoryTodoRepository()
 
 
-REPOSITORY_FACTORIES: list[RepositoryFactory] = [_in_memory]
-REPOSITORY_CLASSES: list[type[object]] = [InMemoryTodoRepository]
+def _sqlite(tmp_path: Path) -> TodoRepository:
+    return SqliteTodoRepository.from_path(tmp_path / "todo.db")
 
-T0 = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)
+
+REPOSITORY_FACTORIES: list[RepositoryFactory] = [_in_memory, _sqlite]
+REPOSITORY_CLASSES: list[type[object]] = [InMemoryTodoRepository, SqliteTodoRepository]
 
 
 @pytest.fixture(params=REPOSITORY_FACTORIES)
 def repository(request: pytest.FixtureRequest, tmp_path: Path) -> TodoRepository:
     factory: RepositoryFactory = request.param
     return factory(tmp_path)
-
-
-def make_todo(
-    n: int, title: str = "Buy milk", *, done: bool = False, created_at: datetime = T0
-) -> Todo:
-    return Todo(id=UUID(int=n), title=title, done=done, created_at=created_at)
 
 
 def _get(repository: TodoRepository, todo: Todo) -> None:

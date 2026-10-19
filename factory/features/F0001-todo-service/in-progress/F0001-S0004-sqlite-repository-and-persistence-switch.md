@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: tests
-  started_at: '2026-10-19T13:13:16.622475Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -34,6 +30,12 @@ journal:
   kind: started
   at: '2026-10-19T13:13:16.622475Z'
   stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-10-19T13:14:51.621368Z'
+  stage: tests
+  run: baaa7380b8204b1ebc93551a3b149e50
 ---
 
 # SQLite repository and persistence switch
@@ -121,3 +123,38 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
      - `app.domain` and `app.service` are untouched.
    - Scope: it is within feature F0001. The scope lists the SQLite repository behind the same protocol, the contract suite and the persistence switch, and decisions 8, 14, 15 and 16 of `feature.md` are all reflected in the criteria. Nothing in "Out of scope" is touched.
 4. factory: started tests as opencode-demo.
+5. tester: Wrote the tests for every acceptance criterion against the Interface. All the new tests fail to import because the modules under test don't exist yet. `make lint` is green. I skipped the type check, as this stage says to.
+
+   Criterion → test:
+   - criterion 1: tests/repository/test_contract.py, the whole suite. `REPOSITORY_FACTORIES` gains `_sqlite`, which returns `SqliteTodoRepository.from_path(tmp_path / "todo.db")`.
+   - criterion 2: tests/repository/test_sqlite.py::test_from_path_creates_a_missing_file_and_starts_empty
+   - criterion 3: tests/repository/test_sqlite.py::test_todo_is_seen_by_a_second_instance_on_the_same_path
+   - criterion 4: tests/repository/test_sqlite.py::test_second_instance_on_the_same_engine_keeps_the_stored_todos
+   - criterion 5: tests/repository/test_sqlite.py::test_created_at_survives_the_round_trip
+   - criterion 6: tests/repository/test_sqlite.py::test_title_with_quotes_and_sql_is_stored_verbatim
+   - criterion 7: tests/api/test_main.py::test_todo_db_chooses_the_repository (rows: missing, empty, set)
+   - criterion 8: tests/api/test_main.py::test_todos_persist_across_apps_on_the_same_file
+   - criterion 9: tests/api/test_main.py::test_in_memory_app_writes_no_file
+   - criterion 10: tests/repository/test_contract.py::test_repository_does_not_inherit_the_protocol, with a new `SqliteTodoRepository` row in `REPOSITORY_CLASSES`.
+   - criterion 11: tests/repository/test_sqlite.py::test_stored_row_has_the_documented_format (rows: open-utc, done-utc, open-other-offset). It reads the `todos` table back through a reflected Core `Table` and `select`, so it doesn't depend on what the module calls its table object.
+   - criterion 12: tests/repository/test_sqlite.py::test_path_and_str_open_the_same_file (rows: path-then-str, str-then-path)
+   - criterion 13: the existing tests/api/test_imports.py::test_only_main_imports_the_repository_layer, left unchanged.
+   - criteria 14 and 15: not tests. They are covered by `make check` and the docs stage.
+
+   Files created: tests/repository/test_sqlite.py, tests/api/test_main.py, tests/conftest.py (the `db_path` fixture, `tmp_path / "todo.db"`, which both new modules use).
+
+   Earlier test files changed:
+   - tests/repository/test_contract.py: changed with the human's leave in the Interface (the `_sqlite` factory and the `SqliteTodoRepository` class row).
+   - Also in test_contract.py, under the standing leave in CLAUDE.md for moving a shared helper: `make_todo` and its copy of `T0` moved to tests/fakes.py, where `T0` already existed with the same value. test_contract.py now imports both from there. Every contract test keeps its name and checks the same thing.
+   - tests/fakes.py: gains `make_todo`.
+
+   Rejected: moving the `T0` copy in tests/domain/test_model.py. Nothing in this story needs it.
+
+   Modules the test runner could not import:
+   - `app.repository.sqlite`, in tests/repository/test_contract.py, tests/repository/test_sqlite.py and tests/api/test_main.py.
+   - `build_repository` from `app.api.main`, in tests/api/test_main.py.
+
+   Open: nothing.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 109 passed, 20 warnings, 3 errors in 3.31s
