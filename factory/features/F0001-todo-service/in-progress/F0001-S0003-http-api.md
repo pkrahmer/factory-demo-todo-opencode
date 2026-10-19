@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: tests
+  started_at: '2026-10-19T13:03:39.084724Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -42,6 +46,11 @@ journal:
   at: '2026-10-19T13:03:18.813385Z'
   stage: intake
   run: 16fd4f3640864aeb846e2def3e583c46
+- number: 7
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:03:39.084724Z'
+  stage: tests
 ---
 
 # HTTP API
@@ -231,3 +240,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    - Smoke test: the commands are runnable (uvicorn on port 8765 with a cleanup trap). The `Expect:` line gives five checkable lines that match the five commands that print.
    - Architecture: it matches `CLAUDE.md`. Only `app.api.main` wires the repository, and criterion 23 tests that. Errors map in one place. Boundaries are Pydantic models, and `get_service` lives in `dependencies.py`.
    - Scope: inside the feature's scope (HTTP API, one error shape, committed OpenAPI schema). It touches nothing in the "Out of scope" list, and it adds no operations endpoints.
+7. factory: started tests as opencode-demo.
