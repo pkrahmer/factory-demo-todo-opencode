@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: review
-  started_at: '2026-10-19T13:53:17.375314Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -56,6 +52,12 @@ journal:
   kind: started
   at: '2026-10-19T13:53:17.375314Z'
   stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-10-19T13:53:42.045339Z'
+  stage: review
+  run: 562e46f4e7324487848210a086587335
 ---
 
 # Todo statistics
@@ -190,3 +192,16 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/
 8. factory: started review as opencode-demo.
+9. reviewer: no findings
+
+   Reviewed `git diff main...HEAD -- . ':!factory'` against the work item.
+   - Criteria 1 to 8 each have a test that checks what the criterion says. Criteria 1 to 5 are in tests/service/test_stats.py, criteria 6 and 7 in tests/api/test_stats.py, and criterion 8 is the existing tests/api/test_openapi.py::test_committed_schema_matches_the_app, with docs/openapi.json regenerated. Criterion 6 is one parametrized test with two rows, run through TestClient against create_app. The Interface states no limit, validation or error, so there is no refused side to test. The coder's journal (entry 7) records `make check` green.
+   - Architecture: `TodoService.stats` uses only the repository protocol's `list_all` and counts in one pass. `TodoStats` is a frozen, slotted dataclass in app.service with a docstring, and `total` is a property. app.api.schemas imports TodoStats from app.service, which the layer order allows (api → service). The router uses the existing `Service` dependency and is included in `create_app`. Domain and repository are untouched.
+   - Security: there are no secrets and no strings built into commands or queries, and no check is silenced by a marker or a baseline entry.
+   - Quality: names are clear and there is no dead code. `CountingRepository` is new; no counting fake already exists under tests/. The new test data reuses `make_todo` and `TickingClock` from tests/fakes.py.
+   - Hygiene: the journal names the main decision (one `list_all` and one pass) and what was rejected (a repository count method, filtering twice). The Description matches what was built, and criterion 10 still names what docs/api.md must say.
+
+   Earlier tests changed:
+   - tests/api/test_health.py: standing leave to move a shared test helper (the `HTTP_METHODS` constant moved to tests/fakes.py; every test keeps its name and what it checks).
+   - tests/api/test_openapi.py: standing leave to move a shared test helper (the same `HTTP_METHODS` move; every test keeps its name and what it checks).
+   - tests/fakes.py: standing leave to move a shared test helper (it receives the moved `HTTP_METHODS` constant; nothing else changed).
