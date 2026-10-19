@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 1
 attempts: 0
@@ -102,6 +102,11 @@ journal:
   at: '2026-10-19T13:22:15.392660Z'
   stage: smoke-test
   run: f699b87d74374ad1bfa5748e53afaeb9
+- number: 18
+  speaker: factory
+  kind: done
+  at: '2026-10-19T13:23:31.189193Z'
+  stage: approval
 ---
 
 # SQLite repository and persistence switch
@@ -353,3 +358,4 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
     Findings: none.
 
     Open: nothing.
+18. factory: done (pull request merged); cost: 8 runs, 6.5 min, 45 turns, 223362 tokens in (835300 more from cache), 30635 out, $1.65
