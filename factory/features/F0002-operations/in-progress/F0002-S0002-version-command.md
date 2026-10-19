@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: smoke-test
+  started_at: '2026-10-19T13:47:51.980718Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -123,6 +127,11 @@ journal:
   at: '2026-10-19T13:47:31.405540Z'
   stage: docs
   run: a7a4ec783ce34216b5e625b0fb7fe660
+- number: 22
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:47:51.980718Z'
+  stage: smoke-test
 ---
 
 # Version command
@@ -333,3 +342,4 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
     Only documents changed, so I did not run `make check`. The factory's check run decides.
 
     `check`: check: green
+22. factory: started smoke-test as opencode-demo.
