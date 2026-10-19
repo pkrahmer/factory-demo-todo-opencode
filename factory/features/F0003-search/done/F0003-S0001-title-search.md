@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 1
 attempts: 0
@@ -124,6 +124,11 @@ journal:
   at: '2026-10-19T14:14:38.051939Z'
   stage: smoke-test
   run: aa6f381fabc44fa9991cf42812dd049e
+- number: 22
+  speaker: factory
+  kind: done
+  at: '2026-10-19T14:17:01.360700Z'
+  stage: approval
 ---
 
 # Title search
@@ -399,3 +404,4 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
     Findings: none.
 
     Open: none.
+22. factory: done (pull request merged); cost: 10 runs, 6.6 min, 54 turns, 264860 tokens in (1003600 more from cache), 28676 out, $1.87
