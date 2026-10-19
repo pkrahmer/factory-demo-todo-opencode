@@ -10,7 +10,9 @@ The service is for one user: there is no authentication. Where the todos are kep
 uv run uvicorn app.api.main:app --port 8765
 ```
 
-`app.api.main` is the composition root: it builds the service around the repository that `build_repository(os.environ)` returns (see *Storage*) and is the only `app.api` module that imports `app.repository`. `create_app(service)` in `app.api.app` builds the same application around any service, which is how the tests run it.
+`app.api.main` is the composition root and the only `app.api` module that imports `app.repository`. `build_app(environ)` builds the whole application from an environment mapping: the service around the repository that `build_repository(environ)` returns (see *Storage*), and the storage kind that `/health` reports. The module's `app` is `build_app(os.environ)`.
+
+`create_app(service, *, storage="memory")` in `app.api.app` builds the same application around any service, which is how the tests run it. `storage` is only what `/health` reports (`"memory"` or `"sqlite"`); it does not choose anything.
 
 ## Storage
 
@@ -45,6 +47,24 @@ All bodies are JSON. A todo is returned as:
 
 - **List filter.** `GET /todos?done=true` returns only the completed todos, `?done=false` only the open ones; without `done` all of them. Any other value is a 422.
 - **Ids.** A `todo_id` that is not a UUID is a 422, an unknown one a 404.
+
+### Health
+
+`GET /health` is what a monitor polls. It answers 200 with exactly three fields:
+
+```json
+{"status": "ok", "version": "0.1.0", "storage": "memory"}
+```
+
+- `status` is always `"ok"`: the endpoint answers when the process is up, and there is no other value.
+- `version` is the installed package version, `importlib.metadata.version("app")` (`0.1.0` in `pyproject.toml` today).
+- `storage` is `"sqlite"` when the app was started with `TODO_DB` set and not empty, otherwise `"memory"` (see *Storage*).
+
+The handler never touches the service or the repository; it reads the storage kind that `create_app` stored on the app. So it answers 200 also when the database cannot be read, and a 200 says the server is running, not that the todos are reachable. It has no parameters and no error response of its own, and it is tagged `health` in the schema.
+
+```bash
+curl -s localhost:8765/health
+```
 
 ### Title rules
 

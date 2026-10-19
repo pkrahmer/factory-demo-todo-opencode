@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 6
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: docs
-  started_at: '2026-10-19T13:34:37.960960Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -67,6 +63,12 @@ journal:
   kind: started
   at: '2026-10-19T13:34:37.960960Z'
   stage: docs
+- number: 11
+  speaker: documenter
+  kind: result
+  at: '2026-10-19T13:35:27.205310Z'
+  stage: docs
+  run: 5905ceb6232b4700adbc593d0e3532f0
 ---
 
 # Health endpoint
@@ -212,3 +214,21 @@ Expect: one line, `{'status': 'ok', 'version': '0.1.0', 'storage': 'memory'}`.
 
    Earlier tests: none. The diff only adds `tests/api/test_health.py` and changes no test file that `main` already holds.
 10. factory: started docs as opencode-demo.
+11. documenter: Documented `GET /health` and `build_app`.
+
+    Files changed:
+    - `docs/api.md`: the *Running it* section now describes `build_app(environ)` and `create_app(service, *, storage="memory")`. A new *Health* section under *Endpoints* gives the three fields, `status`, `version` and `storage`, and where each comes from. It says the handler never touches the service or the repository, so a 200 means the server is running, not that the todos are reachable. It adds a `curl` example.
+    - `README.md`: in *Getting started*, `GET /health` is named as the way to check a running server, with the expected body and a `curl` line. The *Where to look next* entry for `docs/api.md` now lists `/health`.
+    - `docs/project-guide.md`:
+      - *Choosing the repository* now covers `build_app`, the shared private `_storage_kind` rule, and why the reported kind cannot differ from the chosen repository.
+      - The API module table adds `health` and `HealthRead` / `StorageKind`, and updates the `app` and `main` rows.
+      - A sentence after the table says the storage kind is app state that `build_app` keeps equal to the repository it chose.
+      - Step 3 of *Adding a repository* says to give the new repository a `StorageKind` value.
+
+    Cross-read and found current against the diff: the rest of `docs/api.md` (storage, endpoints table, title and PATCH rules, errors, examples) and the rest of `docs/project-guide.md` (layers, domain, repositories, service, *Try it*). I did not read `docs/openapi.json`, since it is generated, and criterion 7's existing test covers it.
+
+    Findings for the coder: none. The code matches the Interface. The one difference is the `StorageKind` alias in place of the spelled-out Literal, which the coder and reviewer already noted. Public docstrings are not required in `app.api`.
+
+    Stale text I noticed but did not touch: none.
+
+    `check`: check: green
