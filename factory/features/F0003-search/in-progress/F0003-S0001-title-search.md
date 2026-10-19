@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: docs
+  started_at: '2026-10-19T14:13:05.316489Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -102,6 +106,11 @@ journal:
   at: '2026-10-19T14:12:44.997280Z'
   stage: review
   run: 49e14edd906c461abf224a0320ee9b2b
+- number: 18
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:13:05.316489Z'
+  stage: docs
 ---
 
 # Title search
@@ -343,3 +352,4 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
     - tests/api/test_stats.py: changed under the standing leave to move a shared test helper. Its `service` copy was replaced by the shared `ticking_service`, and the test keeps its name and check.
     - tests/service/test_todo_service.py: changed under the standing leave to move a shared test helper. Its `ticking_service` copy was removed in favour of the shared one, and its fixed-clock `service` stays.
     - tests/conftest.py: no leave needed. The change only adds fixtures and leaves `db_path` as it was.
+18. factory: started docs as opencode-demo.
