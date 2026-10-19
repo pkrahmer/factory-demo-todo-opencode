@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: review
+  started_at: '2026-10-19T13:08:10.152509Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -64,6 +68,11 @@ journal:
   at: '2026-10-19T13:07:49.930733Z'
   stage: doing
   run: d297557698c74b08a0afb35de364b79f
+- number: 11
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:08:10.152509Z'
+  stage: review
 ---
 
 # HTTP API
@@ -326,3 +335,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
 
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
+11. factory: started review as opencode-demo.
