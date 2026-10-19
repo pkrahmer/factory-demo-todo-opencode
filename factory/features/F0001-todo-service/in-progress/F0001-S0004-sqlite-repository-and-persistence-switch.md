@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 4
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: docs
-  started_at: '2026-10-19T13:19:50.013263Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -89,6 +85,12 @@ journal:
   kind: started
   at: '2026-10-19T13:19:50.013263Z'
   stage: docs
+- number: 15
+  speaker: documenter
+  kind: result
+  at: '2026-10-19T13:21:29.108496Z'
+  stage: docs
+  run: a422ee5b5fa2421f9f27a5e21c700a74
 ---
 
 # SQLite repository and persistence switch
@@ -291,3 +293,27 @@ Expect: three lines: the created todo as JSON with `"title":"Survive a restart"`
     - tests/repository/test_contract.py: the human's leave in the story's Interface (the `_sqlite` factory and the `SqliteTodoRepository` row in `REPOSITORY_CLASSES`), plus the standing leave in `CLAUDE.md` to move a shared helper (`make_todo` and the copy of `T0` now come from `tests/fakes.py`). Every test keeps its name and what it checks.
     - tests/fakes.py: the standing leave to move a shared helper (`make_todo` moved in). Nothing already in the file changed.
 14. factory: started docs as opencode-demo.
+15. documenter: Wrote the documentation for the SQLite repository and the `TODO_DB` switch. I found nothing in the diff that contradicts the Interface or the criteria. No findings for the coder.
+
+    Files changed:
+    - `docs/api.md`: added a *Storage* section, as the docs criterion asks.
+      - It covers `TODO_DB=<path>` (SQLite file, created on first start, survives a restart) and `TODO_DB` unset or empty (in memory, gone on restart).
+      - It also covers the stored table and columns, and the formats of `created_at` and `id`.
+      - I ran two things and wrote down what they showed. A relative path is resolved against the directory the server starts from. A missing parent directory makes the server fail at start with `unable to open database file`.
+      - Replaced the stale "a SQLite repository comes in a later story" in the intro and the "builds the service around an `InMemoryTodoRepository`" text in *Running it*.
+      - Reworded the PATCH note about two writes, which was true only for memory. With SQLite a failure between the two writes can leave the rename applied without the `done` change.
+    - `README.md`: *Getting started* now shows `TODO_DB=todo.db uv run uvicorn ...`, and also the in-memory start without it. *Where to look next* mentions storage and the two repositories.
+    - `docs/project-guide.md`: updated the "built so far" line, the `app.repository` row (now `sqlite.py`, with SQLAlchemy Core) and the `main` module row.
+      - Added two sections. *SQLite repository* covers the table, the fixed-width `created_at` format and why it is used (the database sorts `list_all()` itself), and the error mapping. *Choosing the repository* covers `build_repository`.
+      - *Adding a repository* gets a third step: teach `build_repository` when to choose the new repository.
+
+    Ran: the README's `TODO_DB=todo.db` uvicorn start from a temporary directory. It created the todo and `todo.db`. I also ran the restart persistence and the relative-path and missing-directory cases through `app.api.main`.
+
+    Cross-read and found current: `docs/api.md` (endpoints, title and PATCH rules, errors, examples), the domain, protocol, in-memory and service sections of `docs/project-guide.md`, the `README.md` build section, and `docs/openapi.json`. The code did not change a route or a schema.
+
+    Stale text I saw and did not touch: none that is unrelated to this story.
+
+    Things I left in place that the reader might ask about:
+    - The coder's notes in the journal (`select(_todos)` gives an untyped row, and each `from_path` never disposes its engine). The second is now in the project guide. The first is a typing detail, not for the reader of the docs.
+
+    `check`: check: green

@@ -2,7 +2,7 @@
 
 For anyone changing the to-do service: the layers, why they are drawn that way, and the domain model. `CLAUDE.md` holds the rules every change follows; this file explains what they protect.
 
-Built so far: the domain layer, an in-memory repository, the service layer and the HTTP API. The SQLite repository comes in a later story.
+Built so far: the domain layer, two repositories (in memory and SQLite), the service layer and the HTTP API with its choice of storage.
 
 ## Layers
 
@@ -12,7 +12,7 @@ One package, `app`, under `src/`:
 | --- | --- | --- |
 | `app.api` | HTTP to service calls; the one place where domain errors become status codes; wiring (choosing the concrete repository) in `app.api.main` | `app.service`, `app.domain` |
 | `app.service` | The use cases, written against the repository protocol | `app.domain` |
-| `app.repository` | Concrete storage, one module per kind (`memory.py` so far) | `app.domain` |
+| `app.repository` | Concrete storage, one module per kind (`memory.py`, `sqlite.py`) | `app.domain` (and SQLAlchemy Core in `sqlite.py`) |
 | `app.domain` | The entity, the errors, the repository protocol | the standard library and itself |
 
 `app.service` and `app.repository` sit on the same level and never import each other. The service sees storage only through the protocol in `app.domain.repository`; a repository does not know there is a service. That is what lets the service be tested against the in-memory repository and run against SQLite.
@@ -71,6 +71,18 @@ A repository satisfies the protocol structurally and does not inherit it; a test
 
 `app.repository.memory.InMemoryTodoRepository` keeps todos in a dictionary by id, for as long as the process runs. It sorts on `(created_at, id)` when listing.
 
+### SQLite repository
+
+`app.repository.sqlite.SqliteTodoRepository(engine)` keeps todos in a table `todos` through SQLAlchemy Core: a module-level `Table`, no ORM models, and every statement built from Core constructs (`insert`, `select`, `update`, `delete`); the semgrep rule `project-no-sql-text` refuses `text` and `exec_driver_sql`. `SqliteTodoRepository.from_path(path)` opens (and creates) the file at `path`, given as `str` or `Path`. The constructor creates the table when it is missing and leaves an existing table and its rows alone, so two instances on one engine or one file see the same todos.
+
+Stored format: `id` TEXT primary key (hyphenated UUID), `title` TEXT, `done` BOOLEAN, `created_at` TEXT NOT NULL. `created_at` is written in UTC as `%Y-%m-%dT%H:%M:%S.%f+00:00`: microseconds always, offset always `+00:00`. That fixed width is deliberate. `isoformat()` drops the microseconds when they are zero, and then the text would not sort by time. With the fixed form the database sorts `list_all()` itself, `ORDER BY created_at, id`, which gives the protocol's order (the hyphenated UUID is fixed-width lowercase hex, so its text order is the UUID order). A time read back is timezone-aware and equal to the one stored.
+
+Errors map as in memory: a duplicate id (`IntegrityError` on insert) becomes `DuplicateTodo`, and an `update` or `delete` that touches no row becomes `TodoNotFound`. Each `from_path` creates its own engine and never disposes it, which is fine for a server that lives as long as the process.
+
+### Choosing the repository
+
+`app.api.main.build_repository(environ)` returns `InMemoryTodoRepository()` when `TODO_DB` is missing or empty, otherwise `SqliteTodoRepository.from_path(environ["TODO_DB"])`; `app` is built from `build_repository(os.environ)` at import. This is the only wiring. For the operator's view see *Storage* in `docs/api.md`.
+
 ## Service
 
 `app.service.todo_service.TodoService` holds the use cases. It is built with a `TodoRepository` and a clock: `TodoService(repository, clock=utc_now)`. It imports only `app.domain` and the standard library; it reaches storage through the repository protocol and never imports `app.repository`, so any repository that satisfies the protocol works.
@@ -102,14 +114,15 @@ What the service owns:
 | `errors` | `register_error_handlers`: the one place where domain errors and request validation errors become a status code and `{"detail": "..."}` |
 | `routes` | The `/todos` router; each handler calls the service and returns a `TodoRead` |
 | `app` | `create_app(service)`: titles the API `Todo service`, stores the service on `app.state`, includes the router, registers the handlers |
-| `main` | `app`, built around an `InMemoryTodoRepository`: the composition root and the only module that imports `app.repository` |
+| `main` | `build_repository(environ)` and `app`, built around the repository it returns: the composition root and the only module that imports `app.repository` |
 
 Because the service is passed to `create_app` and read back from the app's own state, two apps never share one, and a test can hand in a service with a fixed clock. A new error type that the API should map is added to `_STATUS_BY_ERROR` in `errors.py`; `DuplicateTodo` has no mapping, since ids are generated by the service and no request can cause it.
 
 ## Adding a repository
 
-1. Write the class in `app/repository/`, with no base class, importing only `app.domain`.
-2. In `tests/repository/test_contract.py`, add its factory (a `Callable[[Path], TodoRepository]`, called with the test's `tmp_path`) to `REPOSITORY_FACTORIES` and its class to `REPOSITORY_CLASSES`. The contract suite then runs against it.
+1. Write the class in `app/repository/`, with no base class, importing nothing of the project but `app.domain`.
+2. In `tests/repository/test_contract.py`, add its factory (a `Callable[[Path], TodoRepository]`, called with the test's `tmp_path`) to `REPOSITORY_FACTORIES` and its class to `REPOSITORY_CLASSES`. The contract suite then runs against it; the SQLite repository is in both lists.
+3. Teach `build_repository` in `app/api/main.py` when to choose it.
 
 ## Try it
 
