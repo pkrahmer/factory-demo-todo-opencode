@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: smoke-test
+  started_at: '2026-10-19T12:50:18.593385Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -69,6 +73,11 @@ journal:
   at: '2026-10-19T12:49:58.069249Z'
   stage: docs
   run: d96f959fa54a4e5d9ad4b5dfd57c4c48
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-10-19T12:50:18.593385Z'
+  stage: smoke-test
 ---
 
 # Domain model and in-memory repository
@@ -339,3 +348,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     - The guide says the API layer maps errors to status codes. That is the architecture rule in `CLAUDE.md`, not code that exists yet, and the guide does not claim otherwise.
 
     `check`: check: green
+12. factory: started smoke-test as opencode-demo.
