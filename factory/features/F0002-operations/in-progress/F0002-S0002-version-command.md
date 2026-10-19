@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T13:45:12.810011Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -99,6 +95,12 @@ journal:
   kind: started
   at: '2026-10-19T13:45:12.810011Z'
   stage: doing
+- number: 17
+  speaker: coder
+  kind: result
+  at: '2026-10-19T13:46:00.526411Z'
+  stage: doing
+  run: cfc3517bc8224b5eaf7169c27d4764b3
 ---
 
 # Version command
@@ -248,3 +250,26 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
     `lint`: lint: green (0.0 s)
     `test`: test: green (7.2 s)
 16. factory: started doing as opencode-demo.
+17. coder: I changed no code and no tests this round. The only review finding (entry 11) was the inline layer check in `tests/test_main.py`, a copy of an existing helper. The tester fixed it in entry 15: `belongs_to` now lives in `tests/imports.py`, and `tests/test_main.py`, `tests/api/test_imports.py` and `tests/domain/test_imports.py` all use it. Nothing in `src/` needed to change for that.
+
+    What I built: `src/app/__main__.py`, unchanged since entry 9.
+    - It holds `main(argv: list[str] | None = None) -> int` and the `sys.exit(main())` guard.
+    - When no `argv` is passed, `main` reads `sys.argv[1:]`.
+    - The argument list `["--version"]` prints `app <version>` to stdout and returns 0.
+    - Every other argument list prints `usage: python -m app --version` to stderr and returns 2.
+    - The module imports only `sys` and `importlib.metadata`.
+
+    Main choice, unchanged: one exact comparison against `["--version"]`. I rejected `argparse` because it adds its own `--help` that exits 0, prints a different usage text, and exits through `SystemExit`, while the Interface wants a returned 2.
+
+    Refactor: I read the whole diff against `main` again, and nothing needed changing.
+
+    Description: unchanged. The journal did not change what the task means.
+
+    `make check`: green, 165 passed, total coverage 99.38%.
+
+    Noticed, not touched:
+    - Coverage reports line 21 of `__main__.py`, the `sys.exit(main())` guard, as not covered. The child-process test does run that line, but coverage doesn't measure the child process.
+    - The docs criterion, the README's *Getting started* section, is the documenter's.
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 7 dead code, in .reports/
