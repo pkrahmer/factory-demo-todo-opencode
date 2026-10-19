@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 0
 attempts: 0
@@ -80,6 +80,11 @@ journal:
   at: '2026-10-19T12:58:03.243754Z'
   stage: smoke-test
   run: 4f94ce3c43db4b87af2aeae8cb6ade4b
+- number: 14
+  speaker: factory
+  kind: done
+  at: '2026-10-19T12:59:22.413454Z'
+  stage: approval
 ---
 
 # Service layer with filtering
@@ -319,3 +324,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
     - The output does not exercise these criteria: 3, 4 (creation order with a clock that ticks), 9–12 and 14. Their tests and `make check` cover them.
 
     Findings: none.
+14. factory: done (pull request merged); cost: 6 runs, 3.1 min, 26 turns, 138001 tokens in (368844 more from cache), 16990 out, $0.92
