@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: review
+  started_at: '2026-10-19T13:53:17.375314Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -47,6 +51,11 @@ journal:
   at: '2026-10-19T13:52:57.180357Z'
   stage: doing
   run: 4ba2596cb4e8418e93cb84179042c01c
+- number: 8
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:53:17.375314Z'
+  stage: review
 ---
 
 # Todo statistics
@@ -180,3 +189,4 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
 
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/
+8. factory: started review as opencode-demo.
