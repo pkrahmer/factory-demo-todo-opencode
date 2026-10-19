@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T14:11:04.255880Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -89,6 +85,12 @@ journal:
   kind: started
   at: '2026-10-19T14:11:04.255880Z'
   stage: doing
+- number: 15
+  speaker: coder
+  kind: result
+  at: '2026-10-19T14:12:02.822902Z'
+  stage: doing
+  run: ebff2ce61606473dad96afbce147a0c0
 ---
 
 # Title search
@@ -286,3 +288,25 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
     `lint`: lint: green (0.0 s)
     `test`: test: green (5.7 s)
 14. factory: started doing as opencode-demo.
+15. coder: Round 1. In entry 13 the tester moved the fixtures behind review findings 1–3 into `tests/conftest.py`: `ticking_service`, `client`, `three_todos` and `milk_done_and_open`. That closes all three findings. I changed no code and no tests this round.
+
+    What I built: nothing new. The source from round 0 stands:
+    - `src/app/service/todo_service.py`: `TodoService.list(*, done=None, search=None)`.
+    - `src/app/api/routes.py`: `list_todos` with `search: Annotated[str | None, Query(max_length=MAX_TITLE_LENGTH)]`.
+    - `docs/openapi.json`: regenerated with `make openapi`.
+
+    Main decision: keep the round-0 source as it is, because none of the findings concerned it. The service narrows the repository's list step by step: first by `done`, then by the stripped, case-folded search text. I rejected again a single comprehension that combines both conditions, because it is harder to read.
+
+    Checks: I ran `make check` against the moved fixtures, which includes the `mypy --strict` run the tests stage skips. It ended `check: green`, with 187 tests passing.
+
+    Refactor pass: I read `git diff main -- src` again and found nothing to change.
+
+    Description: unchanged; the journal did not change the meaning of the task.
+
+    Noticed, not touched:
+    - pytest still warns `StarletteDeprecationWarning` from `fastapi.testclient`. It comes from the installed dependencies.
+    - `src/app/__main__.py` line 21 has no test coverage. That was already so before this story.
+    - Criterion 12 (the docs) is the documenter's.
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 8 dead code, in .reports/
