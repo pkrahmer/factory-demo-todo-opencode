@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 0
 attempts: 0
@@ -80,6 +80,11 @@ journal:
   at: '2026-10-19T12:50:38.648576Z'
   stage: smoke-test
   run: da3ad6b8720748afa94667fcdfc86ae3
+- number: 14
+  speaker: factory
+  kind: done
+  at: '2026-10-19T12:51:56.403055Z'
+  stage: approval
 ---
 
 # Domain model and in-memory repository
@@ -376,3 +381,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     I fixed nothing and changed no file. I did not run `make check` again: the factory runs the stage's checks itself, and the coder (journal 7) and documenter (journal 11) both reported it green.
 
     Open: nothing.
+14. factory: done (pull request merged); cost: 6 runs, 4.3 min, 25 turns, 152057 tokens in (362025 more from cache), 24662 out, $1.13
