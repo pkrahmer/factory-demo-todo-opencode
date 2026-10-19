@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: docs
+  started_at: '2026-10-19T13:54:02.767874Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -58,6 +62,11 @@ journal:
   at: '2026-10-19T13:53:42.045339Z'
   stage: review
   run: 562e46f4e7324487848210a086587335
+- number: 10
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:54:02.767874Z'
+  stage: docs
 ---
 
 # Todo statistics
@@ -205,3 +214,4 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
    - tests/api/test_health.py: standing leave to move a shared test helper (the `HTTP_METHODS` constant moved to tests/fakes.py; every test keeps its name and what it checks).
    - tests/api/test_openapi.py: standing leave to move a shared test helper (the same `HTTP_METHODS` move; every test keeps its name and what it checks).
    - tests/fakes.py: standing leave to move a shared test helper (it receives the moved `HTTP_METHODS` constant; nothing else changed).
+10. factory: started docs as opencode-demo.
