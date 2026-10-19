@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: doing
+  started_at: '2026-10-19T13:06:13.686796Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -53,6 +57,11 @@ journal:
   at: '2026-10-19T13:05:53.538531Z'
   stage: tests
   run: 3599e41db6d449e090c4ab04c5d67d78
+- number: 9
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:06:13.686796Z'
+  stage: doing
 ---
 
 # HTTP API
@@ -283,3 +292,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
 
    `lint`: lint: green (0.0 s)
    `test`: 1 failed, 78 passed, 20 warnings, 2 errors in 2.65s
+9. factory: started doing as opencode-demo.
