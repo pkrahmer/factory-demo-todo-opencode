@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 8
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: docs
-  started_at: '2026-10-19T13:54:02.767874Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -67,6 +63,12 @@ journal:
   kind: started
   at: '2026-10-19T13:54:02.767874Z'
   stage: docs
+- number: 11
+  speaker: documenter
+  kind: result
+  at: '2026-10-19T13:55:02.458884Z'
+  stage: docs
+  run: e263f6d5cde94a8bbcb3c4fb4941e969
 ---
 
 # Todo statistics
@@ -215,3 +217,17 @@ Expect: one line, `{'open': 2, 'done': 1, 'total': 3}`.
    - tests/api/test_openapi.py: standing leave to move a shared test helper (the same `HTTP_METHODS` move; every test keeps its name and what it checks).
    - tests/fakes.py: standing leave to move a shared test helper (it receives the moved `HTTP_METHODS` constant; nothing else changed).
 10. factory: started docs as opencode-demo.
+11. documenter: Documented `GET /stats` for the reader who was not there. The code matches the Interface and the criteria (`TodoStats` is frozen with `total` as a property, `stats()` makes one `list_all` call, `StatsRead.from_stats`, the router tagged `stats`, `create_app` includes it), so there are no findings for the coder.
+
+    Files changed:
+    - `docs/api.md`: added a `GET /stats` row to the endpoint table (criterion 10) and a "Stats" section with the three fields, the empty case, the fact that counts are not cached, the tag and one curl example. Added the `/health` row to the same table: the endpoint was documented below the table but missing from it.
+    - `docs/project-guide.md`: added `stats()` to the service table and "The counts" to what the service owns (frozen slotted `TodoStats`, `total` a property, one `list_all` call, why the count is in the service). Added `StatsRead` and the `stats` module to the API module table and said that `create_app` includes the stats router.
+    - `README.md`: added a `/stats` curl example in "Getting started" and updated the "Where to look next" pointers.
+
+    Run: the story's smoke test printed `{'open': 2, 'done': 1, 'total': 3}` with status 200, and an empty app gave all zeros, matching what the docs say. The curl commands are the same requests through a running server. I did not run `make check`: only documents changed, and the factory's checks decide.
+
+    Cross-read and found current: `docs/openapi.json` (generated, matches the code, covered by the existing test), the rest of `docs/api.md` (errors, title and PATCH rules, storage, health) and the rest of `docs/project-guide.md` (layers, domain, repositories, composition root).
+
+    Stale or missing, not mine to fix: `docs/decisions.md`, which `CLAUDE.md` names, does not exist yet. Nothing in this story needed a lasting reason, so I did not create it. Every test run prints a Starlette deprecation warning about `httpx`; the coder noted it too, and it is unrelated.
+
+    `check`: check: green
