@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 0
 attempts: 0
@@ -20,8 +20,13 @@ journal:
   at: '2026-10-19T13:28:52.954136Z'
   stage: acceptance
   run: 9b2fbeb24a0241209fac57440abe29f4
+- number: 3
+  speaker: factory
+  kind: done
+  at: '2026-10-19T13:29:40.249257Z'
+  stage: done
 stories: [F0001-S0001, F0001-S0002, F0001-S0003, F0001-S0004]
-outcome: null
+outcome: accepted
 ---
 
 # Acceptance of Todo service
@@ -229,3 +234,4 @@ Human interventions: **1 question answered (cause: question), 0.0 h waited.** Th
    6. Decisions: the 18 in `feature.md` plus 10 from the stories' journals, listed. Earlier tests changed: `test_todo_service.py`, `domain/test_imports.py`, `test_contract.py` and `fakes.py`, each with a named leave. None changed without one.
    7. Slow checks: none beyond `make check` and `make mutants`. The slowest test is 0.088 s. `/work` grew by 0.4 GB, explained by `.venv` (482 MB) plus `mutants/` and `.reports/`.
    8. Cost: 27 runs, 20.2 min, $5.35. S0003 and S0004 cost $1.65 each: S0003 is the largest story and had one intake question; S0004 had one review round over `Row[Any]`. One question was answered by the human (S0003's padded-title criterion), with 0.0 h waited.
+3. factory: done (pull request merged); cost: 1 runs, 4.7 min, 23 turns, 108742 tokens in (1808031 more from cache), 24920 out, $1.40
