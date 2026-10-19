@@ -1,17 +1,13 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: intake
-  started_at: '2026-10-19T12:44:07.150760Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,12 @@ journal:
   kind: started
   at: '2026-10-19T12:44:07.150760Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-10-19T12:44:34.306199Z'
+  stage: intake
+  run: ac53c480166942b88ebb3851974476ac
 ---
 
 # Domain model and in-memory repository
@@ -160,3 +162,35 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
 
 1. 2026-10-19 human: created.
 2. factory: started intake as opencode-demo.
+3. intake: accepted
+
+   - Interface: it names concrete modules and signatures: `app/domain/model.py` (`Todo`, `MAX_TITLE_LENGTH`, `new`, `with_title`, `with_done`), `errors.py`, `repository.py` (`TodoRepository`) and `app/repository/memory.py` (`InMemoryTodoRepository`). The test modules and the contract-suite mechanism are also named: a `repository` fixture over a list of factories, plus a list of classes. Each Interface comment has a criterion:
+     - Title strip: 3.
+     - Title bounds: 4 and 5.
+     - UTC conversion: 6.
+     - Naive datetime raising `ValueError`: 7.
+     - `new` giving a uuid4 and `done=False`: 1 and 2.
+     - `with_*` leaving the original unchanged: 8 and 9.
+     - Frozen dataclass: 10.
+     - "However a todo is built": the criteria name `Todo(...)`, `Todo.new` and `with_title` explicitly.
+   - Criteria: each fits one parametrized or plain test with no further decision, and each rule has its failing side:
+     - Blank title: 4.
+     - 201 characters: 5, with 1 and 200 accepted.
+     - Naive datetime: 7.
+     - Duplicate id: 15.
+     - Unknown id for get, update and delete: 16, plus the repository left unchanged after a failed update.
+     - The repository ordering has both clauses: `created_at` in 18, id tie-break in 19.
+     - Error messages: 11 and 12.
+     - Error hierarchy: 13.
+     - Empty list: 17.
+     - No inheritance of the protocol: 22.
+     - Domain import ban: 23.
+     - Closing criteria: `make check` and docs are last (24, 25).
+   - Smoke test: both blocks are runnable `uv run python -c` commands against the stated modules. Each `Expect:` gives exact output lines (creation order despite insertion order, stripped title, UTC isoformat, and the two exact error messages).
+   - Architecture: it matches `CLAUDE.md`.
+     - The domain holds the frozen dataclass, the errors and the protocol, and imports only the standard library.
+     - The in-memory repository sits in `app.repository` and satisfies the protocol structurally.
+     - There is no service or API code.
+     - The existing import-linter layers contract already covers these layers.
+     - `docs/project-guide.md` does not exist yet; criterion 25 has the documenter create it. The README already has a *Where to look next* section to extend.
+   - Scope: it stays inside feature scope (entity, title rule, timestamps, errors, protocol, in-memory repository). It stays out of the SQLite repository (S0004), the service (S0002) and the API (S0003). It changes no other story's tests. It is consistent with feature decisions 1–4 and 15.
