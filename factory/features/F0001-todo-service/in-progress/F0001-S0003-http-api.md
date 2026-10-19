@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim: null
+claim:
+  instance: opencode-demo
+  stage: intake
+  started_at: '2026-10-19T13:02:58.046467Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -30,6 +34,11 @@ journal:
   speaker: human
   kind: comment
   at: '2026-10-19T13:02:40.644386Z'
+  stage: intake
+- number: 5
+  speaker: factory
+  kind: started
+  at: '2026-10-19T13:02:58.046467Z'
   stage: intake
 ---
 
@@ -191,3 +200,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    - Architecture: layers are respected. Only `main` wires the repository, and criterion 23 tests that. The errors map in one place, and the boundaries are Pydantic models.
    - Scope: inside the feature's scope (HTTP API, one error shape, committed OpenAPI) and not in its "Out of scope".
 4. 2026-10-19 human: (c), both. Add the criterion before the two closing ones: `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`. And add the row to criterion 3's parametrized test: a title of 200 characters with surrounding spaces returns 201. The title is stripped first, then the domain's length and blank rules apply; the schema puts no length or blank rule of its own on `title`.
+5. factory: started intake as opencode-demo.
