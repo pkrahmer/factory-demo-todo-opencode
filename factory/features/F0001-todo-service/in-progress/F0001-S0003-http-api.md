@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6267831077]
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T13:06:13.686796Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -62,6 +58,12 @@ journal:
   kind: started
   at: '2026-10-19T13:06:13.686796Z'
   stage: doing
+- number: 10
+  speaker: coder
+  kind: result
+  at: '2026-10-19T13:07:49.930733Z'
+  stage: doing
+  run: d297557698c74b08a0afb35de364b79f
 ---
 
 # HTTP API
@@ -293,3 +295,34 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    `lint`: lint: green (0.0 s)
    `test`: 1 failed, 78 passed, 20 warnings, 2 errors in 2.65s
 9. factory: started doing as opencode-demo.
+10. coder: Built the HTTP API in `src/app/api/`. All the tests pass without changes, and `make check` is green.
+    - `__init__.py`: the package.
+    - `schemas.py`:
+      - `TodoCreate`, `TodoUpdate` and `TodoRead` with `from_domain`.
+      - Neither `TodoCreate` nor `TodoUpdate` has a length or blank rule on `title`; the domain strips the title and applies its rule.
+      - `TodoUpdate` has an after-validator that refuses a body setting neither field, so FastAPI answers 422.
+    - `dependencies.py`: `get_service` reads the service from `request.app.state`; `Service` is the annotated dependency.
+    - `errors.py`: the one place where errors become status codes.
+      - `register_error_handlers` maps `TodoNotFound` to 404 and `InvalidTitle` to 422 through a table of error type → status.
+      - It turns `RequestValidationError` into one sentence: `"<location joined with dots>: <msg>"` of the first error.
+    - `routes.py`:
+      - The router with the five endpoints.
+      - `PATCH` renames first when a title is given, otherwise it reads the todo. Then it completes or reopens when `done` is given, so an invalid title changes nothing.
+      - `DELETE` returns 204 with an empty body.
+    - `app.py`: `create_app`, titled "Todo service". It stores the service on `app.state`, includes the router and registers the handlers.
+    - `main.py`: the composition root and the only module that imports `app.repository`.
+    - `docs/openapi.json`: generated with `make openapi`.
+
+    Main decision: the error handlers are plain typed functions, registered through `app.exception_handler(type)(handler)`. I rejected `app.add_exception_handler` with handlers that take `Exception`: Starlette's typing would then need an `isinstance` assert or a `cast` inside each handler, and ruff refuses the assert (S101).
+
+    Refactor: I made one change. `PATCH` first read the todo even when a rename would return it; now it reads only when no title is given. Behaviour is the same and `make check` is green afterwards.
+
+    Noticed but did not touch:
+    - `DuplicateTodo` has no status mapping, because the Interface's table leaves it out. It cannot come from the API anyway, since ids are generated server-side.
+    - A `PATCH` that sets both fields does two writes (rename, then complete or reopen). That is fine in memory; whether a later repository needs both writes to succeed or fail together is open.
+    - FastAPI's test client prints a StarletteDeprecationWarning (httpx → httpx2) during `make test`. That is a dependency matter, outside this story.
+
+    The journal did not change the meaning of the task beyond what intake already wrote into the Description and criteria.
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
