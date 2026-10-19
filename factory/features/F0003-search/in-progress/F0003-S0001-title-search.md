@@ -1,3 +1,30 @@
+---
+stage: intake
+blocked: null
+round: 0
+attempts: 0
+crashes: 0
+pull_request: null
+comments_read: []
+handed_over: null
+claim:
+  instance: opencode-demo
+  stage: intake
+  started_at: '2026-10-19T14:03:37.359907Z'
+  lease_duration: 60
+journal:
+- number: 1
+  speaker: human
+  kind: created
+  at: '2026-10-19T14:03:37.353581Z'
+  stage: intake
+- number: 2
+  speaker: factory
+  kind: started
+  at: '2026-10-19T14:03:37.359907Z'
+  stage: intake
+---
+
 # Title search
 
 ## Description
@@ -65,3 +92,6 @@ print(r.status_code, list(r.json()))
 Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
 
 ## Journal
+
+1. 2026-10-19 human: created.
+2. factory: started intake as opencode-demo.
