@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 10
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: docs
-  started_at: '2026-10-19T14:13:05.316489Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -111,6 +107,12 @@ journal:
   kind: started
   at: '2026-10-19T14:13:05.316489Z'
   stage: docs
+- number: 19
+  speaker: documenter
+  kind: result
+  at: '2026-10-19T14:13:55.958007Z'
+  stage: docs
+  run: 7dc01b661299410eb620f282b8f57af5
 ---
 
 # Title search
@@ -353,3 +355,17 @@ Expect: two lines, `['Buy Milk', 'MILK run']`, then `422 ['detail']`.
     - tests/service/test_todo_service.py: changed under the standing leave to move a shared test helper. Its `ticking_service` copy was removed in favour of the shared one, and its fixed-clock `service` stays.
     - tests/conftest.py: no leave needed. The change only adds fixtures and leaves `db_path` as it was.
 18. factory: started docs as opencode-demo.
+19. documenter: Round 1 docs. Criterion 12 asks for `search` in the `docs/api.md` endpoint table with its rules in a sentence, and one `search` call in the README. I wrote both, plus the matching changes to `docs/project-guide.md`. I ran the search calls through `TestClient` (stripped search, search with `done`, 201 characters giving 422 with `query.search: String should have at most 200 characters`). The `curl` examples were not run against a live server. I edited only documents, so I did not run `make check`; the factory's run decides.
+
+    Files changed:
+    - `docs/api.md`: The `GET /todos` row now names the `done` and `search` parameters. The "List filter" bullet became "List filters" and states the `search` rules: stripped, Unicode case-folded substring, missing, empty or blank means no filter, at most 200 characters counted as sent, combines with `done`, creation order. The errors table and its examples include a `search` over 200 characters (`query.search: ...`). A new example calls `?search=milk&done=false`.
+    - `README.md`: The intro mentions filtering by a piece of the title. The shell example gains one `search` call, and the "Where to look next" bullets mention the list filters.
+    - `docs/project-guide.md`: The service table shows `list(*, done=None, search=None)`. "The done filter" became "The filters": `done` first, then the stripped, `casefold`ed substring, `None`/empty/blank means no filter, repository order, and the filtering stays in the service because the protocol has no filtered list. The `routes` row records that the schema's `max_length` refuses a longer `search`. The `stats` sentence now says "Like the filters".
+
+    Cross-read against the diff and found current: the story's Interface and criteria against `src/app/service/todo_service.py` and `src/app/api/routes.py`; the rest of `docs/api.md` (storage, health, stats, title rules, PATCH rules, error shape); the rest of `docs/project-guide.md` (layers, domain model, repositories, Try it, Adding a repository); the rest of the README. `docs/openapi.json` is generated and was not touched.
+
+    Findings for the coder: none. The code matches the Interface and the criteria.
+
+    Stale text noticed, not touched: nothing related to this story. The `StarletteDeprecationWarning` from the installed dependencies, which the coder already noted, is not a documentation matter.
+
+    `check`: check: green
