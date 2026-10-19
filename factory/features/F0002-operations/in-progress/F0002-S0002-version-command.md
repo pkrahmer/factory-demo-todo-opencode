@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 7
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: doing
-  started_at: '2026-10-19T13:41:35.289108Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -55,6 +51,12 @@ journal:
   kind: started
   at: '2026-10-19T13:41:35.289108Z'
   stage: doing
+- number: 9
+  speaker: coder
+  kind: result
+  at: '2026-10-19T13:42:19.057491Z'
+  stage: doing
+  run: 58d2dd1e98e3490fa0ef838764a0f851
 ---
 
 # Version command
@@ -140,3 +142,20 @@ Expect: two lines, `usage: python -m app --version` (on stderr), then `exit 2`.
    `lint`: lint: green (0.0 s)
    `test`: 155 passed, 20 warnings, 1 error in 6.79s
 8. factory: started doing as opencode-demo.
+9. coder: What I built: `src/app/__main__.py`. It holds `main(argv: list[str] | None = None) -> int` and the `sys.exit(main())` guard. With no `argv` given, `main` reads `sys.argv[1:]`. The argument list `["--version"]` prints `app {importlib.metadata.version('app')}` to stdout and returns 0. Every other argument list prints `usage: python -m app --version` to stderr and returns 2. The module imports only `sys` and `importlib.metadata`, nothing from the layers. The usage line and the two exit codes are named module constants.
+
+   Main choice: one exact comparison, `arguments != ["--version"]`, instead of `argparse`. I rejected `argparse` for three reasons:
+   - it adds its own `--help` with exit 0;
+   - its usage text is different;
+   - it exits through `SystemExit`, where the Interface wants a returned 2 and a fixed usage line for every other argument list.
+
+   Refactor: I read the diff and nothing needed changing. The tests in `tests/test_main.py` were not touched.
+
+   `make check`: green, 165 passed.
+
+   Noticed, not touched:
+   - Coverage reports line 21 of `__main__.py`, the `sys.exit(main())` guard, as not covered. The child-process test does run it, but the child is outside coverage's measurement. Total coverage is 99.38%, above the 90% gate.
+   - The docs criterion, the README's *Getting started* section, is the documenter's.
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 7 dead code, in .reports/
