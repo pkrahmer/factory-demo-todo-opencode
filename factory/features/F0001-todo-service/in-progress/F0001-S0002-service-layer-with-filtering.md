@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: opencode-demo
-  stage: smoke-test
-  started_at: '2026-10-19T12:57:46.108993Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -78,6 +74,12 @@ journal:
   kind: started
   at: '2026-10-19T12:57:46.108993Z'
   stage: smoke-test
+- number: 13
+  speaker: smoke-tester
+  kind: result
+  at: '2026-10-19T12:58:03.243754Z'
+  stage: smoke-test
+  run: 4f94ce3c43db4b87af2aeae8cb6ade4b
 ---
 
 # Service layer with filtering
@@ -282,3 +284,38 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
     `check`: check: green
 12. factory: started smoke-test as opencode-demo.
+13. smoke-tester: I ran both smoke-test commands from the repository root, exactly as written and in order. Neither starts a server. Both printed what their `Expect:` line says, and both exited with code 0. I fixed nothing and did not run `make check`, since the factory runs it after this stage.
+
+    Command 1 (fixed clock: create, complete, filter, rename):
+
+    ```
+    ['Buy milk']
+    ['Write the next story']
+    Write story S0003 2026-10-04T12:00:00+00:00
+    ```
+
+    Met its `Expect:` line. The three lines are, in order, `['Buy milk']`, `['Write the next story']` and `Write story S0003 2026-10-04T12:00:00+00:00`.
+
+    Command 2 (a blank title, then an unknown id, then an empty list):
+
+    ```
+    InvalidTitle
+    TodoNotFound
+    []
+    ```
+
+    Met its `Expect:` line. The three lines are, in order, `InvalidTitle`, `TodoNotFound` and `[]`.
+
+    Against the acceptance criteria:
+    - The output agrees with these criteria:
+      - 1: the title is stripped (`Buy milk`), and `created_at` is the time the clock returned (`2026-10-04T12:00:00+00:00`).
+      - 2: a blank title raises `InvalidTitle`, and `list()` is still `[]` afterwards.
+      - 5: `done=True` and `done=False` each return only their own todos.
+      - 6: the rename returns the stripped new title, and `get` shows the same `created_at`.
+      - 8: `complete` marks the todo done, since it shows up under `done=True`.
+      - 13: `complete` with an unknown id raises `TodoNotFound`.
+      - 15: a service built without a clock creates and lists without error.
+    - The output contradicts no criterion.
+    - The output does not exercise these criteria: 3, 4 (creation order with a clock that ticks), 9–12 and 14. Their tests and `make check` cover them.
+
+    Findings: none.
